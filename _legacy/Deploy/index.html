@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="JJ Desserts - Postres caseros hechos con amor. Sabor que enamora.">
+    <title>JJ Desserts - Sabor que enamora</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Dancing+Script:wght@600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+    <!-- Top announcement bar -->
+    <div class="top-bar">
+        <span class="puzzle-icon">&#x2756;</span>
+        <span data-i18n="topBar">SABOR QUE ENAMORA</span>
+        <span class="heart-icon">&#9825;</span>
+    </div>
+
+    <!-- Header / Navigation -->
+    <header class="header">
+        <div class="header-container">
+            <button class="hamburger" aria-label="Menu" id="hamburgerBtn">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+
+            <a href="#home" class="logo">
+                <div class="logo-circle">
+                    <div class="logo-top-text">DIFFERENT NOT LESS</div>
+                    <div class="logo-icon">&#9818;</div>
+                    <div class="logo-main">JJ</div>
+                    <div class="logo-sub">DESSERTS</div>
+                    <div class="logo-spoon">&#127869;</div>
+                </div>
+            </a>
+
+            <div class="header-right">
+                <button class="lang-switcher" id="langSwitcher" aria-label="Cambiar idioma">
+                    <span class="lang-active">ES</span>
+                    <span class="lang-sep">/</span>
+                    <span class="lang-inactive">EN</span>
+                </button>
+                <button class="icon-btn" aria-label="Search">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="11" cy="11" r="8"/>
+                        <path d="m21 21-4.35-4.35"/>
+                    </svg>
+                </button>
+                <button class="icon-btn" aria-label="Cart">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/>
+                        <path d="M3 6h18"/>
+                        <path d="M16 10a4 4 0 0 1-8 0"/>
+                    </svg>
+                </button>
+            </div>
+        </div>
+
+        <!-- Mobile menu -->
+        <nav class="mobile-nav" id="mobileNav">
+            <ul>
+                <li><a href="#home" data-i18n="navHome">Inicio</a></li>
+                <li><a href="#menu" data-i18n="navMenu">Menú</a></li>
+                <li><a href="#about" data-i18n="navAbout">Nosotros</a></li>
+                <li><a href="#orders" data-i18n="navOrders">Pedidos</a></li>
+                <li><a href="#contact" data-i18n="navContact">Contacto</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <!-- Hero section with carousel -->
+    <section class="hero" id="home">
+        <div class="hero-decoration puzzle-1">&#x2756;</div>
+        <div class="hero-decoration puzzle-2">&#x2756;</div>
+        <div class="hero-decoration puzzle-3">&#x2756;</div>
+
+        <div class="hero-container">
+            <div class="hero-content">
+                <p class="hero-eyebrow" data-i18n="heroEyebrow">HOMEMADE DESSERTS</p>
+                <h1 class="hero-title">
+                    <span class="hero-title-1" data-i18n="heroTitle1">Sabor que</span>
+                    <span class="hero-title-2" data-i18n="heroTitle2">enamora</span>
+                </h1>
+                <div class="hero-divider">
+                    <span class="line"></span>
+                    <span class="puzzle">&#x2756;</span>
+                    <span class="line"></span>
+                </div>
+                <p class="hero-subtitle" data-i18n="heroSubtitle">Hechos con los mejores ingredientes y mucho amor.</p>
+                <a href="#orders" class="btn btn-primary" data-i18n="heroCTA">ORDENAR AHORA</a>
+            </div>
+
+            <div class="hero-carousel">
+                <div class="carousel-track" id="carouselTrack">
+                    <div class="carousel-slide active">
+                        <div class="dessert-plate">
+                            <img src="https://images.unsplash.com/photo-1565958011703-44f9829ba187?w=900&q=85" alt="Cheesecake artesanal">
+                        </div>
+                    </div>
+                    <div class="carousel-slide">
+                        <div class="dessert-plate">
+                            <img src="https://images.unsplash.com/photo-1551024506-0bccd828d307?w=900&q=85" alt="Postre casero">
+                        </div>
+                    </div>
+                    <div class="carousel-slide">
+                        <div class="dessert-plate">
+                            <img src="https://images.unsplash.com/photo-1488477181946-6428a0291777?w=900&q=85" alt="Postre dulce">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="carousel-controls">
+            <button class="carousel-btn" id="prevBtn" aria-label="Previous slide">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="15 18 9 12 15 6"/>
+                </svg>
+            </button>
+            <span class="carousel-counter"><span id="currentSlide">1</span> / <span id="totalSlides">3</span></span>
+            <button class="carousel-btn" id="nextBtn" aria-label="Next slide">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polyline points="9 18 15 12 9 6"/>
+                </svg>
+            </button>
+            <button class="carousel-btn play-pause" id="playPauseBtn" aria-label="Play/Pause">
+                <svg id="pauseIcon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <rect x="6" y="4" width="4" height="16"/>
+                    <rect x="14" y="4" width="4" height="16"/>
+                </svg>
+                <svg id="playIcon" style="display:none" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <polygon points="5 3 19 12 5 21 5 3"/>
+                </svg>
+            </button>
+        </div>
+    </section>
+
+    <!-- CTA Banner -->
+    <section class="cta-banner">
+        <div class="cta-container">
+            <div class="cta-image">
+                <img src="https://images.unsplash.com/photo-1567327613485-fbc7bf196198?w=600&q=85" alt="Mini cheesecakes">
+                <img src="https://images.unsplash.com/photo-1571115177098-24ec42ed204d?w=600&q=85" alt="Mini cheesecakes" class="overlap">
+            </div>
+            <div class="cta-content">
+                <span class="cta-decoration">&#x2756;</span>
+                <h2 class="cta-title" data-i18n="ctaTitle">¿ANTOJO DE ALGO DULCE?</h2>
+                <p class="cta-subtitle" data-i18n="ctaSubtitle">Haz tu pedido ahora</p>
+                <a href="#menu" class="btn btn-outline" data-i18n="ctaCTA">VER MENÚ</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Values / Features -->
+    <section class="values">
+        <div class="values-container">
+            <div class="value-card">
+                <div class="value-icon">
+                    <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                        <path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z"/>
+                        <path d="M2 21c0-3 1.85-5.36 5.08-6"/>
+                    </svg>
+                </div>
+                <h3 class="value-title">
+                    <span data-i18n="value1Title1">INGREDIENTES</span><br>
+                    <strong data-i18n="value1Title2">DE CALIDAD</strong>
+                </h3>
+                <p class="value-text" data-i18n="value1Text">Utilizamos los mejores ingredientes para garantizar el sabor perfecto.</p>
+            </div>
+
+            <div class="value-card">
+                <div class="value-icon">
+                    <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                        <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+                    </svg>
+                </div>
+                <h3 class="value-title">
+                    <span data-i18n="value2Title1">HECHO CON</span><br>
+                    <strong data-i18n="value2Title2">PASIÓN</strong>
+                </h3>
+                <p class="value-text" data-i18n="value2Text">Cada postre es hecho en casa con dedicación y amor.</p>
+            </div>
+
+            <div class="value-card">
+                <div class="value-icon">
+                    <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                        <polyline points="20 12 20 22 4 22 4 12"/>
+                        <rect x="2" y="7" width="20" height="5"/>
+                        <line x1="12" y1="22" x2="12" y2="7"/>
+                        <path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"/>
+                        <path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/>
+                    </svg>
+                </div>
+                <h3 class="value-title">
+                    <span data-i18n="value3Title1">PERFECTO PARA</span><br>
+                    <strong data-i18n="value3Title2">CUALQUIER OCASIÓN</strong>
+                </h3>
+                <p class="value-text" data-i18n="value3Text">Cumpleaños, reuniones o simplemente porque sí. Nosotros te ayudamos.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Newsletter -->
+    <section class="newsletter">
+        <div class="newsletter-container">
+            <div class="newsletter-icon">
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                    <rect x="2" y="4" width="20" height="16" rx="2"/>
+                    <path d="m22 7-10 5L2 7"/>
+                </svg>
+            </div>
+            <div class="newsletter-text">
+                <h3 data-i18n="newsletterTitle">SUSCRÍBETE A NUESTROS CORREOS</h3>
+                <p data-i18n="newsletterSubtitle">Recibe novedades, promociones y más postres que te encantarán.</p>
+            </div>
+            <form class="newsletter-form" id="newsletterForm">
+                <input type="email" placeholder="Tu correo electrónico" data-i18n-placeholder="newsletterPlaceholder" required>
+                <button type="submit" aria-label="Subscribe">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                        <line x1="5" y1="12" x2="19" y2="12"/>
+                        <polyline points="12 5 19 12 12 19"/>
+                    </svg>
+                </button>
+            </form>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-container">
+            <div class="footer-col footer-brand">
+                <h4>JJ DESSERTS</h4>
+                <p data-i18n="footerTagline">Hechos con amor, para momentos únicos.</p>
+                <span class="footer-heart">&#9825;</span>
+            </div>
+
+            <div class="footer-col">
+                <h5 data-i18n="footerLinks">ENLACES RÁPIDOS</h5>
+                <ul>
+                    <li><a href="#home" data-i18n="navHome">Inicio</a></li>
+                    <li><a href="#menu" data-i18n="navMenu">Menú</a></li>
+                    <li><a href="#about" data-i18n="navAbout">Nosotros</a></li>
+                    <li><a href="#orders" data-i18n="navOrders">Pedidos</a></li>
+                    <li><a href="#contact" data-i18n="navContact">Contacto</a></li>
+                </ul>
+            </div>
+
+            <div class="footer-col">
+                <h5 data-i18n="footerContact">CONTÁCTANOS</h5>
+                <ul class="footer-contact">
+                    <li>
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <rect x="2" y="2" width="20" height="20" rx="5"/>
+                            <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/>
+                            <line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/>
+                        </svg>
+                        <a href="https://www.instagram.com/jj_desserts_different_not_less" target="_blank" rel="noopener">@jj_desserts_</a>
+                    </li>
+                    <li>
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/>
+                        </svg>
+                        <a href="tel:+17861234567">(786) 123-4567</a>
+                    </li>
+                    <li>
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+                            <polyline points="22,6 12,13 2,6"/>
+                        </svg>
+                        <a href="mailto:orders@jjdesserts.com">orders@jjdesserts.com</a>
+                    </li>
+                </ul>
+            </div>
+
+            <div class="footer-col footer-logo-col">
+                <div class="logo-circle small">
+                    <div class="logo-top-text">DIFFERENT NOT LESS</div>
+                    <div class="logo-icon">&#9818;</div>
+                    <div class="logo-main">JJ</div>
+                    <div class="logo-sub">DESSERTS</div>
+                    <div class="logo-spoon">&#127869;</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="footer-bottom">
+            <span class="puzzle-icon">&#x2756;</span>
+            <span data-i18n="footerCopyright">© 2026 JJ DESSERTS. TODOS LOS DERECHOS RESERVADOS.</span>
+            <span class="puzzle-icon">&#x2756;</span>
+        </div>
+    </footer>
+
+    <script src="js/main.js"></script>
+</body>
+</html>

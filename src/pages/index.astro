@@ -1,0 +1,52 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Hero from '../components/Hero.astro';
+import { getSiteSettings, getFeaturedDesserts } from '../sanity/queries';
+import { urlFor } from '../sanity/client';
+import { getStrings } from '../i18n/strings';
+import type { SiteSettings, Dessert } from '../sanity/types';
+
+const locale = 'es';
+const t = getStrings(locale);
+
+let settings: SiteSettings | null = null;
+let featured: Dessert[] = [];
+try {
+  [settings, featured] = await Promise.all([
+    getSiteSettings(),
+    getFeaturedDesserts(),
+  ]);
+} catch (e) {
+  console.warn('Sanity not configured — landing page running with empty data.');
+}
+---
+
+<BaseLayout title="JJ Desserts - Sabor que enamora" description="Postres caseros hechos con amor. Sabor que enamora." locale={locale}>
+  <Hero locale={locale} settings={settings} />
+
+  {featured.length > 0 && (
+    <section class="menu-section">
+      <div class="menu-header">
+        <h2>Destacados</h2>
+        <p>Nuestros postres más pedidos</p>
+      </div>
+      <div class="dessert-grid">
+        {featured.map((d) => (
+          <a href={`/menu/${d.slug}`} class="dessert-card">
+            <div class="dessert-card-image">
+              <img src={urlFor(d.mainImage).width(600).url()} alt={d.nameEs} />
+            </div>
+            <div class="dessert-card-body">
+              <span class="dessert-card-category">{d.category?.nameEs}</span>
+              <h3 class="dessert-card-name">{d.nameEs}</h3>
+              <div class="dessert-card-footer">
+                <span class="dessert-card-price">${d.price.toFixed(2)}</span>
+                <span class="dessert-card-add">{t.menu.addToCart}</span>
+              </div>
+            </div>
+          </a>
+        ))}
+      </div>
+    </section>
+  )}
+</BaseLayout>

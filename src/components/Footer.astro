@@ -1,0 +1,63 @@
+---
+import Logo from './Logo.astro';
+import { getStrings, type Locale } from '../i18n/strings';
+import type { SiteSettings } from '../sanity/types';
+
+interface Props {
+  locale: Locale;
+  settings: SiteSettings | null;
+}
+const { locale, settings } = Astro.props;
+const t = getStrings(locale);
+const homePath = locale === 'es' ? '/' : '/en/';
+const menuPath = locale === 'es' ? '/menu' : '/en/menu';
+const year = new Date().getFullYear();
+---
+
+<footer class="footer">
+  <div class="footer-container">
+    <div class="footer-brand">
+      <h4>JJ Desserts</h4>
+      <p>{t.footer.tagline}</p>
+      <p>Different Not Less <span class="footer-heart">&#9825;</span></p>
+    </div>
+
+    <div class="footer-col">
+      <h5>{t.footer.explore}</h5>
+      <ul>
+        <li><a href={homePath}>{t.nav.home}</a></li>
+        <li><a href={menuPath}>{t.nav.menu}</a></li>
+        <li><a href={`${homePath}#about`}>{t.nav.about}</a></li>
+        <li><a href={`${homePath}#contact`}>{t.nav.contact}</a></li>
+      </ul>
+    </div>
+
+    <div class="footer-col footer-contact" id="contact">
+      <h5>{t.footer.contactUs}</h5>
+      <ul>
+        {settings?.contactEmail && (
+          <li>&#9993; <a href={`mailto:${settings.contactEmail}`}>{settings.contactEmail}</a></li>
+        )}
+        {settings?.contactPhone && (
+          <li>&#9742; <a href={`tel:${settings.contactPhone}`}>{settings.contactPhone}</a></li>
+        )}
+        {settings?.instagramUrl && (
+          <li>&#9737; <a href={settings.instagramUrl} target="_blank" rel="noopener">Instagram</a></li>
+        )}
+        {settings?.businessAddress && (
+          <li>&#9873; <span>{settings.businessAddress}</span></li>
+        )}
+      </ul>
+    </div>
+
+    <div class="footer-logo-col">
+      <Logo size="small" />
+    </div>
+  </div>
+
+  <div class="footer-bottom">
+    <span class="puzzle-icon">&#x2756;</span>
+    <span>&copy; {year} JJ Desserts. {t.footer.rights}.</span>
+    <span class="puzzle-icon">&#x2756;</span>
+  </div>
+</footer>

@@ -1,0 +1,14 @@
+---
+interface Props {
+  size?: 'normal' | 'small';
+}
+const { size = 'normal' } = Astro.props;
+---
+
+<div class={`logo-circle ${size === 'small' ? 'small' : ''}`}>
+  <div class="logo-top-text">DIFFERENT NOT LESS</div>
+  <div class="logo-icon">&#9818;</div>
+  <div class="logo-main">JJ</div>
+  <div class="logo-sub">DESSERTS</div>
+  <div class="logo-spoon">&#127869;</div>
+</div>

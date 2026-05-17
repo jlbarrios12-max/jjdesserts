@@ -1,0 +1,71 @@
+---
+import { getStrings, type Locale } from '../i18n/strings';
+import { urlFor } from '../sanity/client';
+import type { SiteSettings } from '../sanity/types';
+
+interface Props {
+  locale: Locale;
+  settings: SiteSettings | null;
+}
+const { locale, settings } = Astro.props;
+const t = getStrings(locale);
+
+const heroTitle = locale === 'es'
+  ? (settings?.heroTitleEs ?? 'Sabor que')
+  : (settings?.heroTitleEn ?? 'A taste that');
+const heroSubtitle = locale === 'es'
+  ? settings?.heroSubtitleEs
+  : settings?.heroSubtitleEn;
+const ctaText = locale === 'es'
+  ? (settings?.heroCtaEs ?? t.hero.ctaPrimary)
+  : (settings?.heroCtaEn ?? t.hero.ctaPrimary);
+
+const videoUrl = settings?.heroVideo?.asset?.url;
+const posterUrl = settings?.heroPoster ? urlFor(settings.heroPoster).width(800).url() : null;
+const menuPath = locale === 'es' ? '/menu' : '/en/menu';
+---
+
+<section class="hero" id="home">
+  <div class="hero-decoration puzzle-1">&#x2756;</div>
+  <div class="hero-decoration puzzle-2">&#x2756;</div>
+  <div class="hero-decoration puzzle-3">&#x2756;</div>
+
+  <div class="hero-container">
+    <div class="hero-content">
+      <div class="hero-eyebrow">{t.hero.eyebrow}</div>
+      <h1 class="hero-title">
+        <span class="hero-title-1">{heroTitle.split(' ').slice(0, -1).join(' ')}</span>
+        <span class="hero-title-2">{heroTitle.split(' ').slice(-1).join(' ')}</span>
+      </h1>
+      <div class="hero-divider">
+        <div class="line"></div>
+        <span class="puzzle">&#x2756;</span>
+        <div class="line"></div>
+      </div>
+      {heroSubtitle && <p class="hero-subtitle">{heroSubtitle}</p>}
+      <div class="hero-actions">
+        <a href={menuPath} class="btn btn-primary">{ctaText}</a>
+        <a href="#contact" class="btn btn-outline">{t.hero.ctaSecondary}</a>
+      </div>
+    </div>
+
+    <div class="hero-video-wrapper">
+      {videoUrl ? (
+        <video
+          autoplay
+          muted
+          loop
+          playsinline
+          poster={posterUrl ?? undefined}
+        >
+          <source src={videoUrl} type="video/mp4" />
+          {posterUrl && <img src={posterUrl} alt="JJ Desserts" class="hero-video-fallback" />}
+        </video>
+      ) : posterUrl ? (
+        <img src={posterUrl} alt="JJ Desserts" />
+      ) : (
+        <img src="https://images.unsplash.com/photo-1551024506-0bccd828d307?w=800" alt="JJ Desserts placeholder" />
+      )}
+    </div>
+  </div>
+</section>

@@ -1,0 +1,129 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { getAllDesserts, getAllCategories } from '../../sanity/queries';
+import { urlFor } from '../../sanity/client';
+import { getStrings } from '../../i18n/strings';
+import type { Dessert, Category } from '../../sanity/types';
+
+const locale = 'es';
+const t = getStrings(locale);
+
+let desserts: Dessert[] = [];
+let categories: Category[] = [];
+try {
+  [desserts, categories] = await Promise.all([
+    getAllDesserts(),
+    getAllCategories(),
+  ]);
+} catch (e) {
+  console.warn('Sanity not configured — menu page running empty.');
+}
+---
+
+<BaseLayout title="Menú | JJ Desserts" description="Nuestro catálogo de postres caseros" locale={locale}>
+  <section class="menu-section">
+    <div class="menu-header">
+      <h2>{t.menu.title}</h2>
+      <p>{t.menu.subtitle}</p>
+    </div>
+
+    {categories.length > 0 && (
+      <div class="category-filters" id="categoryFilters">
+        <button class="active" data-category="all">{t.menu.filterAll}</button>
+        {categories.map((c) => (
+          <button data-category={c.slug}>{c.nameEs}</button>
+        ))}
+      </div>
+    )}
+
+    {desserts.length > 0 ? (
+      <div class="dessert-grid" id="dessertGrid">
+        {desserts.map((d) => (
+          <article class="dessert-card" data-category={d.category?.slug}>
+            <a href={`/menu/${d.slug}`} class="dessert-card-image">
+              <img src={urlFor(d.mainImage).width(600).url()} alt={d.nameEs} loading="lazy" />
+            </a>
+            <div class="dessert-card-body">
+              <span class="dessert-card-category">{d.category?.nameEs}</span>
+              <h3 class="dessert-card-name">
+                <a href={`/menu/${d.slug}`}>{d.nameEs}</a>
+              </h3>
+              {d.descriptionEs && <p class="dessert-card-desc">{d.descriptionEs}</p>}
+              <div class="dessert-card-footer">
+                <span class="dessert-card-price">${d.price.toFixed(2)}</span>
+                <button
+                  class="dessert-card-add"
+                  data-add-to-cart
+                  data-id={d._id}
+                  data-name-es={d.nameEs}
+                  data-name-en={d.nameEn}
+                  data-price={d.price}
+                  data-image={urlFor(d.mainImage).width(400).url()}
+                  data-slug={d.slug}
+                >{t.menu.addToCart}</button>
+              </div>
+            </div>
+          </article>
+        ))}
+      </div>
+    ) : (
+      <p style="text-align:center; color: var(--gray); padding: 40px;">
+        Aún no hay postres en el catálogo. La dueña puede agregarlos en <a href="/studio" style="color: var(--orange); font-weight: 600;">/studio</a>.
+      </p>
+    )}
+  </section>
+</BaseLayout>
+
+<script>
+  // Category filter
+  const filters = document.querySelectorAll('#categoryFilters button');
+  const cards = document.querySelectorAll('#dessertGrid .dessert-card');
+  filters.forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const cat = btn.getAttribute('data-category');
+      filters.forEach((b) => b.classList.remove('active'));
+      btn.classList.add('active');
+      cards.forEach((c) => {
+        const cardCat = c.getAttribute('data-category');
+        const show = cat === 'all' || cardCat === cat;
+        (c as HTMLElement).style.display = show ? '' : 'none';
+      });
+    });
+  });
+
+  // Add to cart
+  type CartItem = {
+    dessertId: string;
+    nameEs: string;
+    nameEn: string;
+    price: number;
+    quantity: number;
+    imageUrl: string;
+    slug: string;
+  };
+  document.querySelectorAll<HTMLButtonElement>('[data-add-to-cart]').forEach((btn) => {
+    btn.addEventListener('click', (e) => {
+      e.preventDefault();
+      const cart: CartItem[] = JSON.parse(localStorage.getItem('jj_cart') || '[]');
+      const id = btn.dataset.id || '';
+      const existing = cart.find((i) => i.dessertId === id);
+      if (existing) {
+        existing.quantity += 1;
+      } else {
+        cart.push({
+          dessertId: id,
+          nameEs: btn.dataset.nameEs || '',
+          nameEn: btn.dataset.nameEn || '',
+          price: parseFloat(btn.dataset.price || '0'),
+          quantity: 1,
+          imageUrl: btn.dataset.image || '',
+          slug: btn.dataset.slug || '',
+        });
+      }
+      localStorage.setItem('jj_cart', JSON.stringify(cart));
+      document.dispatchEvent(new Event('cart:updated'));
+      btn.textContent = '✓';
+      setTimeout(() => { btn.textContent = btn.textContent === '✓' ? 'Agregar' : btn.textContent; }, 1000);
+    });
+  });
+</script>

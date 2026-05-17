@@ -1,0 +1,90 @@
+---
+import Logo from './Logo.astro';
+import { getStrings, type Locale } from '../i18n/strings';
+
+interface Props {
+  locale: Locale;
+}
+const { locale } = Astro.props;
+const t = getStrings(locale);
+const otherLocale = locale === 'es' ? 'en' : 'es';
+const otherPath = locale === 'es'
+  ? `/en${Astro.url.pathname}`
+  : Astro.url.pathname.replace(/^\/en/, '') || '/';
+const homePath = locale === 'es' ? '/' : '/en/';
+const menuPath = locale === 'es' ? '/menu' : '/en/menu';
+const cartPath = locale === 'es' ? '/cart' : '/en/cart';
+---
+
+<header class="header">
+  <div class="header-container">
+    <button class="hamburger" aria-label="Menu" id="hamburgerBtn">
+      <span></span><span></span><span></span>
+    </button>
+
+    <a href={homePath} class="logo">
+      <Logo />
+    </a>
+
+    <div class="header-right">
+      <a href={otherPath} class="lang-switcher" aria-label="Cambiar idioma / Change language">
+        <span class={locale === 'es' ? 'lang-active' : 'lang-inactive'}>ES</span>
+        <span class="lang-sep">/</span>
+        <span class={locale === 'en' ? 'lang-active' : 'lang-inactive'}>EN</span>
+      </a>
+      <button class="icon-btn" aria-label="Search">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="11" cy="11" r="8"/>
+          <path d="m21 21-4.35-4.35"/>
+        </svg>
+      </button>
+      <a href={cartPath} class="icon-btn" aria-label="Cart" id="cartIcon">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/>
+          <line x1="3" y1="6" x2="21" y2="6"/>
+          <path d="M16 10a4 4 0 0 1-8 0"/>
+        </svg>
+        <span class="cart-badge" id="cartBadge" style="display:none;">0</span>
+      </a>
+    </div>
+  </div>
+
+  <nav class="mobile-nav" id="mobileNav">
+    <ul>
+      <li><a href={homePath}>{t.nav.home}</a></li>
+      <li><a href={menuPath}>{t.nav.menu}</a></li>
+      <li><a href={`${homePath}#about`}>{t.nav.about}</a></li>
+      <li><a href={`${homePath}#contact`}>{t.nav.contact}</a></li>
+    </ul>
+  </nav>
+</header>
+
+<script>
+  const btn = document.getElementById('hamburgerBtn');
+  const nav = document.getElementById('mobileNav');
+  btn?.addEventListener('click', () => {
+    btn.classList.toggle('active');
+    nav?.classList.toggle('active');
+  });
+
+  // Cart badge updater (reads from localStorage)
+  function updateCartBadge() {
+    const badge = document.getElementById('cartBadge');
+    if (!badge) return;
+    try {
+      const cart = JSON.parse(localStorage.getItem('jj_cart') || '[]');
+      const count = cart.reduce((sum: number, item: { quantity: number }) => sum + item.quantity, 0);
+      if (count > 0) {
+        badge.textContent = String(count);
+        badge.style.display = 'flex';
+      } else {
+        badge.style.display = 'none';
+      }
+    } catch (e) {
+      badge.style.display = 'none';
+    }
+  }
+  updateCartBadge();
+  window.addEventListener('storage', updateCartBadge);
+  document.addEventListener('cart:updated', updateCartBadge);
+</script>

@@ -1,0 +1,12 @@
+---
+interface Props {
+  announcement: string;
+}
+const { announcement } = Astro.props;
+---
+
+<div class="top-bar">
+  <span class="puzzle-icon">&#x2756;</span>
+  <span>{announcement}</span>
+  <span class="heart-icon">&#9825;</span>
+</div>
