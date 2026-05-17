@@ -5,10 +5,12 @@ interface Props {
 const { size = 'normal' } = Astro.props;
 ---
 
-<div class={`logo-circle ${size === 'small' ? 'small' : ''}`}>
-  <div class="logo-top-text">DIFFERENT NOT LESS</div>
-  <div class="logo-icon">&#9818;</div>
-  <div class="logo-main">JJ</div>
-  <div class="logo-sub">DESSERTS</div>
-  <div class="logo-spoon">&#127869;</div>
-</div>
+<img
+  src="/images/jj-logo.jpg"
+  alt="JJ Desserts — Different Not Less"
+  class={`logo-image ${size === 'small' ? 'small' : ''}`}
+  width={size === 'small' ? 95 : 110}
+  height={size === 'small' ? 95 : 110}
+  loading="eager"
+  decoding="async"
+/>

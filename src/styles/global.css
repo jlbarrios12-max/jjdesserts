@@ -109,37 +109,20 @@ ul { list-style: none; }
 .lang-switcher .lang-inactive { color: var(--gray); }
 .lang-switcher .lang-sep { color: var(--gray-light); margin: 0 4px; }
 
-/* Logo */
-.logo { justify-self: center; display: block; }
-.logo-circle {
-    width: 110px; height: 110px;
-    border: 2px solid var(--black);
+/* Logo (real brand image) */
+.logo { justify-self: center; display: block; line-height: 0; }
+.logo-image {
+    width: 110px;
+    height: 110px;
     border-radius: 50%;
-    position: relative;
-    background: var(--white);
-    display: flex; flex-direction: column;
-    align-items: center; justify-content: center;
-    padding: 8px; text-align: center;
+    object-fit: cover;
+    display: block;
+    background: var(--black); /* matches the logo's natural background for seamless edges */
 }
-.logo-circle.small { width: 95px; height: 95px; padding: 6px; }
-.logo-top-text {
-    position: absolute; top: 8px; left: 50%;
-    transform: translateX(-50%);
-    font-size: 7px; font-weight: 700; letter-spacing: 0.5px;
-    color: var(--black);
+.logo-image.small {
+    width: 95px;
+    height: 95px;
 }
-.logo-circle.small .logo-top-text { font-size: 6px; top: 6px; }
-.logo-icon { font-size: 16px; line-height: 1; margin-top: 4px; }
-.logo-main {
-    font-family: var(--font-serif);
-    font-size: 28px; font-weight: 700; line-height: 1;
-    margin-top: 2px;
-}
-.logo-circle.small .logo-main { font-size: 24px; }
-.logo-sub { font-size: 8px; font-weight: 600; letter-spacing: 2px; margin-top: 2px; }
-.logo-circle.small .logo-sub { font-size: 7px; }
-.logo-spoon { position: absolute; bottom: 10px; right: 12px; font-size: 14px; opacity: 0.6; }
-.logo-circle.small .logo-spoon { font-size: 12px; bottom: 8px; }
 
 /* Mobile nav */
 .mobile-nav { max-height: 0; overflow: hidden; transition: max-height 0.4s ease; background: var(--white); border-top: 1px solid rgba(0,0,0,0.04); }
@@ -320,7 +303,6 @@ ul { list-style: none; }
 .footer-contact li { display: flex; align-items: center; gap: 12px; color: var(--gray-light); }
 .footer-contact a { text-transform: none; letter-spacing: normal; }
 .footer-logo-col { display: flex; align-items: flex-start; justify-content: flex-end; }
-.footer-logo-col .logo-circle { background: var(--white); border-color: var(--white); }
 .footer-bottom { border-top: 1px solid rgba(255,255,255,0.1); padding: 18px 32px; text-align: center; font-size: 11px; letter-spacing: 2px; display: flex; justify-content: center; align-items: center; gap: 14px; background: var(--orange); color: var(--white); }
 .footer-bottom .puzzle-icon { font-size: 10px; }
 
@@ -346,9 +328,8 @@ ul { list-style: none; }
 
 @media (max-width: 640px) {
     .header-container { padding: 14px 20px; }
-    .logo-circle { width: 85px; height: 85px; padding: 6px; }
-    .logo-circle .logo-main { font-size: 22px; }
-    .logo-circle .logo-top-text { font-size: 6px; }
+    .logo-image { width: 85px; height: 85px; }
+    .logo-image.small { width: 75px; height: 75px; }
     .header-right { gap: 10px; }
     .lang-switcher { padding: 5px 8px; font-size: 11px; }
 
