@@ -117,7 +117,12 @@ ul { list-style: none; }
     border-radius: 50%;
     object-fit: cover;
     display: block;
-    background: var(--black); /* matches the logo's natural background for seamless edges */
+}
+.logo-image.light {
+    background: var(--white); /* matches the light variant's white background */
+}
+.logo-image.dark {
+    background: var(--black); /* matches the dark variant's black background */
 }
 .logo-image.small {
     width: 95px;
