@@ -5,17 +5,17 @@ interface Props {
 }
 const { size = 'normal', variant = 'light' } = Astro.props;
 
-// light = white background with black logo (use on light surfaces, e.g. header)
-// dark  = black background with white logo (use on dark surfaces, e.g. footer)
-const src = variant === 'light' ? '/images/jj-logo-light.jpg' : '/images/jj-logo.jpg';
+// Same transparent PNG used everywhere.
+// "light" = used on light surfaces (header) — logo stays its natural color (black on transparent)
+// "dark"  = used on dark surfaces (footer) — CSS filter inverts black to white
 ---
 
 <img
-  src={src}
+  src="/images/jj-logo.png"
   alt="JJ Desserts — Different Not Less"
   class={`logo-image ${size === 'small' ? 'small' : ''} ${variant}`}
-  width={size === 'small' ? 95 : 110}
-  height={size === 'small' ? 95 : 110}
+  width={size === 'small' ? 100 : 120}
+  height={size === 'small' ? 94 : 112}
   loading="eager"
   decoding="async"
 />

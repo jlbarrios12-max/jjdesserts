@@ -109,24 +109,25 @@ ul { list-style: none; }
 .lang-switcher .lang-inactive { color: var(--gray); }
 .lang-switcher .lang-sep { color: var(--gray-light); margin: 0 4px; }
 
-/* Logo (real brand image) */
+/* Logo (real brand image - transparent PNG) */
 .logo { justify-self: center; display: block; line-height: 0; }
 .logo-image {
-    width: 110px;
-    height: 110px;
-    border-radius: 50%;
-    object-fit: cover;
+    width: 120px;
+    height: 112px;
+    object-fit: contain;
     display: block;
 }
-.logo-image.light {
-    background: var(--white); /* matches the light variant's white background */
-}
-.logo-image.dark {
-    background: var(--black); /* matches the dark variant's black background */
-}
 .logo-image.small {
-    width: 95px;
-    height: 95px;
+    width: 100px;
+    height: 94px;
+}
+/* light variant = natural black logo on transparent (used on light surfaces like the header) */
+.logo-image.light {
+    /* no filter, no background — let transparency do its thing */
+}
+/* dark variant = invert to white logo on transparent (used on dark surfaces like the footer) */
+.logo-image.dark {
+    filter: invert(1);
 }
 
 /* Mobile nav */
@@ -333,8 +334,8 @@ ul { list-style: none; }
 
 @media (max-width: 640px) {
     .header-container { padding: 14px 20px; }
-    .logo-image { width: 85px; height: 85px; }
-    .logo-image.small { width: 75px; height: 75px; }
+    .logo-image { width: 90px; height: 84px; }
+    .logo-image.small { width: 78px; height: 73px; }
     .header-right { gap: 10px; }
     .lang-switcher { padding: 5px 8px; font-size: 11px; }
 
