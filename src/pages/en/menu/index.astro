@@ -126,63 +126,44 @@ function displayPrice(d: Dessert): number {
   });
 
   // Size selector
-  document.querySelectorAll<HTMLElement>('.size-selector').forEach((selector) => {
-    const card = selector.closest('.dessert-card') as HTMLElement;
-    const priceEl = card.querySelector('.dessert-card-price') as HTMLElement;
-    const addBtn = card.querySelector<HTMLButtonElement>('[data-add-to-cart]');
-    selector.querySelectorAll<HTMLButtonElement>('.size-btn').forEach((btn) => {
-      btn.addEventListener('click', () => {
-        selector.querySelectorAll('.size-btn').forEach((b) => b.classList.remove('active'));
-        btn.classList.add('active');
-        const price = parseFloat(btn.dataset.price || '0');
-        if (priceEl) priceEl.textContent = '$' + price.toFixed(2);
-        if (addBtn) {
-          addBtn.dataset.price = btn.dataset.price;
-          addBtn.dataset.sizeEs = btn.dataset.labelEs;
-          addBtn.dataset.sizeEn = btn.dataset.labelEn;
+  document.querySelectorAll('.size-btn').forEach((sBtn) => {
+    sBtn.addEventListener('click', () => {
+      const card = sBtn.closest('.dessert-card');
+      if (!card) return;
+      card.querySelectorAll('.size-btn').forEach((b) => b.classList.remove('active'));
+      sBtn.classList.add('active');
+      const addBtn = card.querySelector('[data-add-to-cart]');
+      if (addBtn) {
+        (addBtn as HTMLButtonElement).dataset.price = (sBtn as HTMLElement).dataset.price || '';
+        (addBtn as HTMLButtonElement).dataset.sizeEs = (sBtn as HTMLElement).dataset.sizeEs || '';
+        (addBtn as HTMLButtonElement).dataset.sizeEn = (sBtn as HTMLElement).dataset.sizeEn || '';
+        const priceEl = card.querySelector('.dessert-card-price');
+        if (priceEl) {
+          const p = parseFloat((sBtn as HTMLElement).dataset.price || '0');
+          priceEl.textContent = '$' + p.toFixed(2);
         }
-      });
+      }
     });
   });
 
   // Add to cart
-  type CartItem = {
-    dessertId: string;
-    nameEs: string;
-    nameEn: string;
-    price: number;
-    quantity: number;
-    imageUrl: string;
-    slug: string;
-    sizeEs?: string;
-    sizeEn?: string;
-  };
+  type CartItem = { dessertId: string; nameEs: string; nameEn: string; price: number; quantity: number; imageUrl: string; slug: string; sizeEs?: string; sizeEn?: string; };
   document.querySelectorAll<HTMLButtonElement>('[data-add-to-cart]').forEach((btn) => {
-    btn.addEventListener('click', (e) => {
-      e.preventDefault();
+    btn.addEventListener('click', () => {
       const cart: CartItem[] = JSON.parse(localStorage.getItem('jj_cart') || '[]');
       const id = btn.dataset.id || '';
-      const sizeEn = btn.dataset.sizeEn || '';
-      const existing = cart.find((i) => i.dessertId === id && (i.sizeEn || '') === sizeEn);
-      if (existing) {
-        existing.quantity += 1;
-      } else {
-        cart.push({
-          dessertId: id,
-          nameEs: btn.dataset.nameEs || '',
-          nameEn: btn.dataset.nameEn || '',
-          price: parseFloat(btn.dataset.price || '0'),
-          quantity: 1,
-          imageUrl: btn.dataset.image || '',
-          slug: btn.dataset.slug || '',
-          sizeEs: btn.dataset.sizeEs || '',
-          sizeEn,
-        });
+      const sizeEs = btn.dataset.sizeEs || '';
+      const existing = cart.find((i) => i.dessertId === id && (i.sizeEs || '') === sizeEs);
+      if (existing) { existing.quantity += 1; }
+      else {
+        cart.push({ dessertId: id, nameEs: btn.dataset.nameEs || '', nameEn: btn.dataset.nameEn || '',
+          price: parseFloat(btn.dataset.price || '0'), quantity: 1,
+          imageUrl: btn.dataset.image || '', slug: btn.dataset.slug || '', sizeEs, sizeEn: btn.dataset.sizeEn || '' });
       }
       localStorage.setItem('jj_cart', JSON.stringify(cart));
       document.dispatchEvent(new Event('cart:updated'));
-      btn.textContent = '✓';
-      setTimeout(() => { btn.textContent = btn.textContent === '✓' ? 'Add' : btn.textContent; }, 1000);
+      btn.textContent = 'OK';
+      setTimeout(() => { btn.textContent = 'Agregar'; }, 1200);
     });
   });
 </script>
