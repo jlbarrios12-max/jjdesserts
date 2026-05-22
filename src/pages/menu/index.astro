@@ -1,6 +1,4 @@
 ---
-export const prerender = false;
-
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import { getAllDesserts, getAllCategories } from '../../sanity/queries';
 import { urlFor } from '../../sanity/client';
@@ -52,7 +50,7 @@ try {
               </h3>
               {d.descriptionEs && <p class="dessert-card-desc">{d.descriptionEs}</p>}
               <div class="dessert-card-footer">
-                <span class="dessert-card-price">${d.price.toFixed(2)}</span>
+                <span class="dessert-card-price">{'$'}{d.price.toFixed(2)}</span>
                 <button
                   class="dessert-card-add"
                   data-add-to-cart
@@ -125,4 +123,7 @@ try {
       localStorage.setItem('jj_cart', JSON.stringify(cart));
       document.dispatchEvent(new Event('cart:updated'));
       btn.textContent = '✓';
-      setTimeout(() => { btn.textContent = btn.textContent === '✓' ? 'Agregar' : btn.textContent; }
+      setTimeout(() => { btn.textContent = btn.textContent === '✓' ? 'Agregar' : btn.textContent; }, 1000);
+    });
+  });
+</script>

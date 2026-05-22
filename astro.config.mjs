@@ -35,7 +35,7 @@ if (sanityConfigured) {
 
 export default defineConfig({
   site: 'https://jjdesserts.com',
-  output: 'hybrid',
+  output: 'server',
   adapter: netlify(),
   integrations,
   i18n: {

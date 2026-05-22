@@ -1,6 +1,4 @@
 ---
-export const prerender = false;
-
 import BaseLayout from '../../../layouts/BaseLayout.astro';
 import { getAllDesserts, getAllCategories } from '../../../sanity/queries';
 import { urlFor } from '../../../sanity/client';
@@ -52,7 +50,7 @@ try {
               </h3>
               {d.descriptionEn && <p class="dessert-card-desc">{d.descriptionEn}</p>}
               <div class="dessert-card-footer">
-                <span class="dessert-card-price">${d.price.toFixed(2)}</span>
+                <span class="dessert-card-price">{'$'}{d.price.toFixed(2)}</span>
                 <button
                   class="dessert-card-add"
                   data-add-to-cart
