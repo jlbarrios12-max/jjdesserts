@@ -32,6 +32,10 @@ body {
     background: var(--cream-light);
     line-height: 1.6;
     overflow-x: hidden;
+    /* Autism puzzle piece watermark */
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Cpath fill='%23D54F1B' opacity='0.035' d='M15 2h10v5.5c0 .6.3 1.1.8 1.4.5.3 1.1.3 1.6 0 .8-.5 1.8-.3 2.4.4l3.4 3.4c.7.7.9 1.6.4 2.4-.3.5-.3 1.1 0 1.6.3.5.8.8 1.4.8H38v10h-5.5c-.6 0-1.1.3-1.4.8-.3.5-.3 1.1 0 1.6.5.8.3 1.8-.4 2.4l-3.4 3.4c-.7.7-1.6.9-2.4.4-.5-.3-1.1-.3-1.6 0-.5.3-.8.8-.8 1.4V38H15v-5.5c0-.6-.3-1.1-.8-1.4-.5-.3-1.1-.3-1.6 0-.8.5-1.8.3-2.4-.4L6.8 27.3c-.7-.7-.9-1.6-.4-2.4.3-.5.3-1.1 0-1.6-.3-.5-.8-.8-1.4-.8H2V12h5.5c.6 0 1.1-.3 1.4-.8.3-.5.3-1.1 0-1.6-.5-.8-.3-1.8.4-2.4l3.4-3.4c.7-.7 1.6-.9 2.4-.4.5.3 1.1.3 1.6 0 .5-.3.8-.8.8-1.4V2z'/%3E%3C/svg%3E");
+    background-repeat: repeat;
+    background-size: 120px 120px;
 }
 a { color: inherit; text-decoration: none; transition: color var(--transition); }
 img { max-width: 100%; display: block; }
@@ -52,7 +56,7 @@ ul { list-style: none; }
     align-items: center;
     gap: 14px;
 }
-.top-bar .puzzle-icon { font-size: 10px; }
+.top-bar .puzzle-icon { width: 14px; height: 14px; flex-shrink: 0; }
 .top-bar .heart-icon { font-size: 14px; }
 
 /* Header */
@@ -288,17 +292,31 @@ ul { list-style: none; }
 .allergens-label { font-size: 11px; font-weight: 600; color: var(--gray); text-transform: uppercase; letter-spacing: 1px; align-self: center; }
 .allergen-tag { font-size: 11px; font-weight: 600; padding: 3px 8px; border-radius: 20px; background: var(--cream); color: var(--gray); border: 1px solid var(--gray-light); }
 
-/* CTA banner (preserved) */
+/* CTA banner */
 .cta-banner { max-width: var(--max-width); margin: 40px auto; padding: 0 32px; }
-.cta-container { background: var(--cream-light); border: 2px solid var(--orange-light); border-radius: var(--radius-lg); padding: 50px; display: grid; grid-template-columns: 1fr 1fr; gap: 40px; align-items: center; position: relative; overflow: hidden; }
-.cta-container::before { content: "\2756"; position: absolute; top: 30%; right: 8%; font-size: 60px; color: var(--orange-soft); opacity: 0.5; }
-.cta-image { position: relative; display: flex; justify-content: center; }
-.cta-image img { width: 180px; height: 180px; border-radius: 50%; object-fit: cover; box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
-.cta-image img.overlap { margin-left: -50px; margin-top: 30px; }
+.cta-container { background: var(--white); border: 1.5px solid rgba(213,79,27,0.25); border-radius: var(--radius-lg); padding: 50px; display: grid; grid-template-columns: 1fr 1fr; gap: 40px; align-items: center; position: relative; overflow: hidden; }
+.cta-image { position: relative; display: flex; justify-content: center; align-items: flex-start; padding: 10px 0; }
+.cta-image img { width: 190px; height: 190px; border-radius: 50%; object-fit: cover; box-shadow: 0 10px 30px rgba(0,0,0,0.12); position: relative; z-index: 1; }
+.cta-image img.overlap { margin-left: -60px; margin-top: 40px; z-index: 0; }
 .cta-content { text-align: center; position: relative; z-index: 2; }
-.cta-decoration { display: inline-block; color: var(--orange); font-size: 16px; margin-bottom: 12px; }
-.cta-title { font-family: var(--font-serif); font-size: 28px; font-weight: 600; letter-spacing: 1px; margin-bottom: 8px; }
-.cta-subtitle { font-family: var(--font-script); font-style: italic; font-size: 28px; color: var(--orange); margin-bottom: 24px; }
+.cta-decoration { display: flex; justify-content: center; margin-bottom: 14px; color: var(--orange); }
+.cta-decoration svg { width: 32px; height: 32px; }
+.cta-title { font-family: var(--font-serif); font-size: 26px; font-weight: 700; letter-spacing: 1px; margin-bottom: 10px; color: var(--black); }
+.cta-subtitle { font-family: var(--font-script); font-style: italic; font-size: 30px; color: var(--orange); margin-bottom: 28px; }
+
+/* Newsletter */
+.newsletter { background: var(--cream); padding: 60px 32px; }
+.newsletter-container { max-width: var(--max-width); margin: 0 auto; display: grid; grid-template-columns: 1fr 1fr; gap: 40px; align-items: center; }
+.newsletter-icon { color: var(--orange); margin-bottom: 14px; }
+.newsletter-icon svg { width: 36px; height: 36px; }
+.newsletter-title { font-size: 16px; font-weight: 700; letter-spacing: 2px; color: var(--black); margin-bottom: 8px; }
+.newsletter-subtitle { font-size: 14px; color: var(--gray); line-height: 1.6; }
+.newsletter-form { display: flex; gap: 0; border-radius: 6px; overflow: hidden; box-shadow: 0 4px 20px rgba(0,0,0,0.07); }
+.newsletter-input { flex: 1; padding: 16px 20px; border: 1.5px solid var(--gray-light); border-right: none; border-radius: 6px 0 0 6px; font-size: 14px; font-family: var(--font-sans); outline: none; background: var(--white); color: var(--black); transition: border-color var(--transition); }
+.newsletter-input:focus { border-color: var(--orange); }
+.newsletter-input::placeholder { color: var(--gray-light); }
+.newsletter-btn { padding: 16px 22px; background: var(--orange); color: var(--white); border: none; border-radius: 0 6px 6px 0; font-size: 16px; font-weight: 700; cursor: pointer; transition: background var(--transition); display: flex; align-items: center; }
+.newsletter-btn:hover { background: var(--black); }
 
 /* Values */
 .values { max-width: var(--max-width); margin: 0 auto; padding: 30px 32px 60px; }
@@ -323,7 +341,7 @@ ul { list-style: none; }
 .footer-contact a { text-transform: none; letter-spacing: normal; }
 .footer-logo-col { display: flex; align-items: flex-start; justify-content: flex-end; }
 .footer-bottom { border-top: 1px solid rgba(255,255,255,0.1); padding: 18px 32px; text-align: center; font-size: 11px; letter-spacing: 2px; display: flex; justify-content: center; align-items: center; gap: 14px; background: var(--orange); color: var(--white); }
-.footer-bottom .puzzle-icon { font-size: 10px; }
+.footer-bottom .puzzle-icon { width: 14px; height: 14px; flex-shrink: 0; }
 
 /* =========================================================
    Dessert detail page

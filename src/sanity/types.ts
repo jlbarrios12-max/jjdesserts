@@ -1,10 +1,5 @@
-// TypeScript types for Sanity content
-
 export interface SanityImage {
-  asset: {
-    _ref: string;
-    _type: 'reference';
-  };
+  asset: { _ref: string; _type: 'reference' };
   hotspot?: { x: number; y: number };
 }
 
@@ -44,9 +39,7 @@ export interface Dessert {
 }
 
 export interface SiteSettings {
-  heroVideo?: {
-    asset: { url: string; mimeType: string };
-  };
+  heroVideo?: { asset: { url: string; mimeType: string } };
   heroPoster?: SanityImage;
   heroTitleEs: string;
   heroTitleEn: string;
@@ -54,23 +47,11 @@ export interface SiteSettings {
   heroSubtitleEn?: string;
   heroCtaEs: string;
   heroCtaEn: string;
+  announcementEs?: string;
+  announcementEn?: string;
   contactEmail?: string;
   contactPhone?: string;
   instagramUrl?: string;
   businessAddress?: string;
-  salesTaxRate: number;
-  announcementEs: string;
-  announcementEn: string;
-}
-
-export interface CartItem {
-  dessertId: string;
-  nameEs: string;
-  nameEn: string;
-  price: number;
-  quantity: number;
-  imageUrl: string;
-  slug: string;
-  sizeEs?: string;
-  sizeEn?: string;
+  salesTaxRate?: number;
 }

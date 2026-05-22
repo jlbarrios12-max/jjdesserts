@@ -24,6 +24,83 @@ try {
 <BaseLayout title="JJ Desserts - Sabor que enamora" description="Postres caseros hechos con amor. Sabor que enamora." locale={locale}>
   <Hero locale={locale} settings={settings} />
 
+  <!-- CTA Banner: ¿Antojo de algo dulce? -->
+  <section class="cta-banner">
+    <div class="cta-container">
+      <div class="cta-image">
+        {featured.length > 0 ? (
+          <img src={urlFor(featured[0].mainImage).width(400).url()} alt={featured[0].nameEs} />
+        ) : (
+          <img src="https://images.unsplash.com/photo-1565958011703-44f9829ba187?w=400&q=80" alt="Cheesecake JJ Desserts" />
+        )}
+        {featured.length > 1 ? (
+          <img src={urlFor(featured[1].mainImage).width(400).url()} alt={featured[1].nameEs} class="overlap" />
+        ) : (
+          <img src="https://images.unsplash.com/photo-1596566996073-db2e9a8f7ac6?w=400&q=80" alt="Cheesecake JJ Desserts" class="overlap" />
+        )}
+      </div>
+      <div class="cta-content">
+        <!-- Autism awareness puzzle piece -->
+        <div class="cta-decoration">
+          <svg viewBox="0 0 40 40" fill="currentColor" xmlns="http://www.w3.org/2000/svg" aria-label="símbolo autismo">
+            <path d="M15 2h10v5.5c0 .6.3 1.1.8 1.4.5.3 1.1.3 1.6 0 .8-.5 1.8-.3 2.4.4l3.4 3.4c.7.7.9 1.6.4 2.4-.3.5-.3 1.1 0 1.6.3.5.8.8 1.4.8H38v10h-5.5c-.6 0-1.1.3-1.4.8-.3.5-.3 1.1 0 1.6.5.8.3 1.8-.4 2.4l-3.4 3.4c-.7.7-1.6.9-2.4.4-.5-.3-1.1-.3-1.6 0-.5.3-.8.8-.8 1.4V38H15v-5.5c0-.6-.3-1.1-.8-1.4-.5-.3-1.1-.3-1.6 0-.8.5-1.8.3-2.4-.4L6.8 27.3c-.7-.7-.9-1.6-.4-2.4.3-.5.3-1.1 0-1.6-.3-.5-.8-.8-1.4-.8H2V12h5.5c.6 0 1.1-.3 1.4-.8.3-.5.3-1.1 0-1.6-.5-.8-.3-1.8.4-2.4l3.4-3.4c.7-.7 1.6-.9 2.4-.4.5.3 1.1.3 1.6 0 .5-.3.8-.8.8-1.4V2z"/>
+          </svg>
+        </div>
+        <h2 class="cta-title">{t.cta.title}</h2>
+        <p class="cta-subtitle">{t.cta.subtitle}</p>
+        <a href={menuPath} class="btn btn-outline">{t.cta.btn}</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Values: Ingredientes · Pasión · Ocasión -->
+  <section class="values">
+    <div class="values-container">
+      <!-- Ingredientes de Calidad -->
+      <div class="value-card">
+        <div class="value-icon">
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 2a10 10 0 0 1 0 20"/>
+            <path d="M12 2C6.5 2 2 6.5 2 12"/>
+            <path d="M12 7c0 0-3 3-3 5s3 5 3 5"/>
+            <path d="M12 7c0 0 3 3 3 5s-3 5-3 5"/>
+          </svg>
+        </div>
+        <div>
+          <p class="value-title">{t.values.quality.line1}<br /><strong>{t.values.quality.line2}</strong></p>
+          <p class="value-text">{t.values.quality.text}</p>
+        </div>
+      </div>
+      <!-- Hecho con Pasión -->
+      <div class="value-card">
+        <div class="value-icon">
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+          </svg>
+        </div>
+        <div>
+          <p class="value-title">{t.values.passion.line1}<br /><strong>{t.values.passion.line2}</strong></p>
+          <p class="value-text">{t.values.passion.text}</p>
+        </div>
+      </div>
+      <!-- Perfecto para cualquier ocasión -->
+      <div class="value-card">
+        <div class="value-icon">
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="8" width="18" height="14" rx="2"/>
+            <path d="M12 8V22M3 13h18"/>
+            <path d="M12 8C12 8 8 4 8 2a2 2 0 0 1 4 0M12 8C12 8 16 4 16 2a2 2 0 0 0-4 0"/>
+          </svg>
+        </div>
+        <div>
+          <p class="value-title">{t.values.occasion.line1}<br /><strong>{t.values.occasion.line2}</strong></p>
+          <p class="value-text">{t.values.occasion.text}</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Featured desserts -->
   {featured.length > 0 && (
     <section class="menu-section">
       <div class="menu-header">
@@ -62,6 +139,36 @@ try {
       </div>
     </section>
   )}
+
+  <!-- Newsletter / Subscribe — hidden until backend is ready -->
+  <section class="newsletter" style="display:none">
+    <div class="newsletter-container">
+      <div>
+        <div class="newsletter-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="2" y="4" width="20" height="16" rx="2"/>
+            <path d="M2 7l10 7 10-7"/>
+          </svg>
+        </div>
+        <h3 class="newsletter-title">{t.newsletter.title}</h3>
+        <p class="newsletter-subtitle">{t.newsletter.subtitle}</p>
+      </div>
+      <form class="newsletter-form" onsubmit="return false;" id="newsletter-form">
+        <input
+          class="newsletter-input"
+          type="email"
+          placeholder={t.newsletter.placeholder}
+          required
+          id="newsletter-email"
+        />
+        <button type="submit" class="newsletter-btn" aria-label="Suscribirse">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M5 12h14M12 5l7 7-7 7"/>
+          </svg>
+        </button>
+      </form>
+    </div>
+  </section>
 </BaseLayout>
 
 <script>
