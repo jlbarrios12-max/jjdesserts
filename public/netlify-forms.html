@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html>
+  <head><title>Netlify Forms</title></head>
+  <body>
+    <!-- Hidden form for Netlify form detection -->
+    <form name="order" data-netlify="true" netlify-honeypot="bot-field" hidden>
+      <input type="hidden" name="form-name" value="order" />
+      <input type="text" name="nombre" />
+      <input type="email" name="email" />
+      <input type="tel" name="telefono" />
+      <input type="text" name="tipo-entrega" />
+      <input type="date" name="fecha-preferida" />
+      <textarea name="notas"></textarea>
+      <input type="hidden" name="pedido" />
+      <input type="hidden" name="total" />
+      <input name="bot-field" />
+    </form>
+  </body>
+</html>
