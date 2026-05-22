@@ -15,6 +15,17 @@ export interface Category {
   slug: string;
 }
 
+export interface DessertSize {
+  _key: string;
+  labelEs: string;
+  labelEn: string;
+  price: number;
+}
+
+export type AllergenKey =
+  | 'dairy' | 'eggs' | 'gluten' | 'peanuts'
+  | 'treeNuts' | 'soy' | 'sesame' | 'fish' | 'shellfish';
+
 export interface Dessert {
   _id: string;
   nameEs: string;
@@ -23,6 +34,8 @@ export interface Dessert {
   descriptionEs?: string;
   descriptionEn?: string;
   price: number;
+  sizes?: DessertSize[];
+  allergens?: AllergenKey[];
   mainImage: SanityImage;
   gallery?: SanityImage[];
   available: boolean;
@@ -58,4 +71,6 @@ export interface CartItem {
   quantity: number;
   imageUrl: string;
   slug: string;
+  sizeEs?: string;
+  sizeEn?: string;
 }

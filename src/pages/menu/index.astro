@@ -3,7 +3,7 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
 import { getAllDesserts, getAllCategories } from '../../sanity/queries';
 import { urlFor } from '../../sanity/client';
 import { getStrings } from '../../i18n/strings';
-import type { Dessert, Category } from '../../sanity/types';
+import type { Dessert, Category, AllergenKey } from '../../sanity/types';
 
 const locale = 'es';
 const t = getStrings(locale);
@@ -17,6 +17,11 @@ try {
   ]);
 } catch (e) {
   console.warn('Sanity not configured — menu page running empty.');
+}
+
+// Helper: display price (first size if available, else base price)
+function displayPrice(d: Dessert): number {
+  return d.sizes && d.sizes.length > 0 ? d.sizes[0].price : d.price;
 }
 ---
 
@@ -49,17 +54,47 @@ try {
                 <a href={`/menu/${d.slug}`}>{d.nameEs}</a>
               </h3>
               {d.descriptionEs && <p class="dessert-card-desc">{d.descriptionEs}</p>}
+
+              {/* Alérgenos */}
+              {d.allergens && d.allergens.length > 0 && (
+                <div class="allergens">
+                  <span class="allergens-label">{t.menu.allergensLabel}:</span>
+                  {d.allergens.map((a: AllergenKey) => (
+                    <span class="allergen-tag">{t.allergens[a]}</span>
+                  ))}
+                </div>
+              )}
+
+              {/* Selector de tamaños */}
+              {d.sizes && d.sizes.length > 0 && (
+                <div class="size-selector">
+                  {d.sizes.map((s, i) => (
+                    <button
+                      class={`size-btn${i === 0 ? ' active' : ''}`}
+                      data-price={s.price}
+                      data-label-es={s.labelEs}
+                      data-label-en={s.labelEn}
+                    >
+                      <span class="size-label">{s.labelEs}</span>
+                      <span class="size-price">{'$'}{s.price.toFixed(2)}</span>
+                    </button>
+                  ))}
+                </div>
+              )}
+
               <div class="dessert-card-footer">
-                <span class="dessert-card-price">{'$'}{d.price.toFixed(2)}</span>
+                <span class="dessert-card-price">{'$'}{displayPrice(d).toFixed(2)}</span>
                 <button
                   class="dessert-card-add"
                   data-add-to-cart
                   data-id={d._id}
                   data-name-es={d.nameEs}
                   data-name-en={d.nameEn}
-                  data-price={d.price}
+                  data-price={displayPrice(d)}
                   data-image={urlFor(d.mainImage).width(400).url()}
                   data-slug={d.slug}
+                  data-size-es={d.sizes && d.sizes.length > 0 ? d.sizes[0].labelEs : ''}
+                  data-size-en={d.sizes && d.sizes.length > 0 ? d.sizes[0].labelEn : ''}
                 >{t.menu.addToCart}</button>
               </div>
             </div>
@@ -91,6 +126,26 @@ try {
     });
   });
 
+  // Size selector — updates price display and cart button data
+  document.querySelectorAll<HTMLElement>('.size-selector').forEach((selector) => {
+    const card = selector.closest('.dessert-card') as HTMLElement;
+    const priceEl = card.querySelector('.dessert-card-price') as HTMLElement;
+    const addBtn = card.querySelector<HTMLButtonElement>('[data-add-to-cart]');
+    selector.querySelectorAll<HTMLButtonElement>('.size-btn').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        selector.querySelectorAll('.size-btn').forEach((b) => b.classList.remove('active'));
+        btn.classList.add('active');
+        const price = parseFloat(btn.dataset.price || '0');
+        if (priceEl) priceEl.textContent = '$' + price.toFixed(2);
+        if (addBtn) {
+          addBtn.dataset.price = btn.dataset.price;
+          addBtn.dataset.sizeEs = btn.dataset.labelEs;
+          addBtn.dataset.sizeEn = btn.dataset.labelEn;
+        }
+      });
+    });
+  });
+
   // Add to cart
   type CartItem = {
     dessertId: string;
@@ -100,13 +155,17 @@ try {
     quantity: number;
     imageUrl: string;
     slug: string;
+    sizeEs?: string;
+    sizeEn?: string;
   };
   document.querySelectorAll<HTMLButtonElement>('[data-add-to-cart]').forEach((btn) => {
     btn.addEventListener('click', (e) => {
       e.preventDefault();
       const cart: CartItem[] = JSON.parse(localStorage.getItem('jj_cart') || '[]');
       const id = btn.dataset.id || '';
-      const existing = cart.find((i) => i.dessertId === id);
+      const sizeEs = btn.dataset.sizeEs || '';
+      // Match by dessert + size so different sizes are separate cart lines
+      const existing = cart.find((i) => i.dessertId === id && (i.sizeEs || '') === sizeEs);
       if (existing) {
         existing.quantity += 1;
       } else {
@@ -118,6 +177,8 @@ try {
           quantity: 1,
           imageUrl: btn.dataset.image || '',
           slug: btn.dataset.slug || '',
+          sizeEs,
+          sizeEn: btn.dataset.sizeEn || '',
         });
       }
       localStorage.setItem('jj_cart', JSON.stringify(cart));

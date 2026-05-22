@@ -15,6 +15,8 @@ export async function getAllDesserts(): Promise<Dessert[]> {
       descriptionEs,
       descriptionEn,
       price,
+      sizes[]{ _key, labelEs, labelEn, price },
+      allergens,
       mainImage,
       gallery,
       featured,
@@ -35,6 +37,8 @@ export async function getDessertBySlug(slug: string): Promise<Dessert | null> {
       descriptionEs,
       descriptionEn,
       price,
+      sizes[]{ _key, labelEs, labelEn, price },
+      allergens,
       mainImage,
       gallery,
       available,
@@ -54,6 +58,8 @@ export async function getFeaturedDesserts(): Promise<Dessert[]> {
       nameEn,
       "slug": slug.current,
       price,
+      sizes[]{ _key, labelEs, labelEn, price },
+      allergens,
       mainImage,
       "category": category->{nameEs, nameEn}
     }
