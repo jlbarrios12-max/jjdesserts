@@ -247,7 +247,7 @@ const t = getStrings(locale);
     const encoded = new URLSearchParams(data as unknown as Record<string, string>).toString();
 
     try {
-      const res = await fetch('/netlify-forms.html', {
+      const res = await fetch('https://primary-production-178a5.up.railway.app/webhook/jj-desserts-order', {
         method: 'POST',
         headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
         body: encoded,
