@@ -39,6 +39,10 @@ const PUZZLE_PATH = "M15 2h10v5.5c0 .6.3 1.1.8 1.4.5.3 1.1.3 1.6 0 .8-.5 1.8-.3 
           ? <img src={urlFor(featured[1].mainImage).width(400).url()} alt={featured[1].nameEs} class="overlap" />
           : <img src="https://images.unsplash.com/photo-1596566996073-db2e9a8f7ac6?w=400&q=80" alt="Cheesecake JJ Desserts" class="overlap" />
         }
+        {featured.length > 2
+          ? <img src={urlFor(featured[2].mainImage).width(400).url()} alt={featured[2].nameEs} class="overlap-2" />
+          : <img src="https://images.unsplash.com/photo-1488477181946-6428a0291777?w=400&q=80" alt="Postre JJ Desserts" class="overlap-2" />
+        }
       </div>
       <div class="cta-content">
         <div class="cta-decoration">
