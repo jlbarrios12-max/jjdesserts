@@ -1,0 +1,179 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { getDessertBySlug } from '../../sanity/queries';
+import { urlFor } from '../../sanity/client';
+import { getStrings } from '../../i18n/strings';
+import type { AllergenKey } from '../../sanity/types';
+
+const locale = 'es';
+const t = getStrings(locale);
+
+const { slug } = Astro.params;
+const dessert = await getDessertBySlug(slug!);
+
+if (!dessert || dessert.available === false) {
+  return Astro.redirect('/menu');
+}
+
+function displayPrice() {
+  return dessert!.sizes && dessert!.sizes.length > 0 ? dessert!.sizes[0].price : dessert!.price;
+}
+---
+
+<BaseLayout
+  title={`${dessert.nameEs} | JJ Desserts`}
+  description={dessert.descriptionEs || `${dessert.nameEs} — postres caseros JJ Desserts`}
+  locale={locale}
+>
+  <section class="detail-section">
+    <div class="detail-back">
+      <a href="/menu">← Volver al Menú</a>
+    </div>
+
+    <div class="detail-layout">
+      <!-- Image gallery -->
+      <div class="detail-images">
+        <div class="detail-main-image">
+          <img
+            src={urlFor(dessert.mainImage).width(800).url()}
+            alt={dessert.nameEs}
+            id="mainImg"
+          />
+        </div>
+        {dessert.gallery && dessert.gallery.length > 0 && (
+          <div class="detail-thumbs">
+            <button class="thumb active" data-src={urlFor(dessert.mainImage).width(800).url()}>
+              <img src={urlFor(dessert.mainImage).width(120).url()} alt={dessert.nameEs} />
+            </button>
+            {dessert.gallery.map((img) => (
+              <button class="thumb" data-src={urlFor(img).width(800).url()}>
+                <img src={urlFor(img).width(120).url()} alt={dessert.nameEs} />
+              </button>
+            ))}
+          </div>
+        )}
+      </div>
+
+      <!-- Info -->
+      <div class="detail-info">
+        <span class="detail-category">{dessert.category?.nameEs}</span>
+        <h1 class="detail-name">{dessert.nameEs}</h1>
+
+        {dessert.descriptionEs && (
+          <p class="detail-desc">{dessert.descriptionEs}</p>
+        )}
+
+        {/* Size selector */}
+        {dessert.sizes && dessert.sizes.length > 0 && (
+          <div class="detail-sizes">
+            <p class="detail-sizes-label">{t.menu.selectSize}</p>
+            <div class="size-selector">
+              {dessert.sizes.map((s, i) => (
+                <button
+                  class={`size-btn${i === 0 ? ' active' : ''}`}
+                  data-price={s.price}
+                  data-label-es={s.labelEs}
+                  data-label-en={s.labelEn}
+                >
+                  <span class="size-label">{s.labelEs}</span>
+                  <span class="size-price">{'$'}{s.price.toFixed(2)}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Allergens */}
+        {dessert.allergens && dessert.allergens.length > 0 && (
+          <div class="allergens detail-allergens">
+            <span class="allergens-label">{t.menu.allergensLabel}:</span>
+            {dessert.allergens.map((a: AllergenKey) => (
+              <span class="allergen-tag">{t.allergens[a]}</span>
+            ))}
+          </div>
+        )}
+
+        <div class="detail-footer">
+          <span class="detail-price" id="detailPrice">{'$'}{displayPrice().toFixed(2)}</span>
+          <button
+            class="detail-add-btn"
+            data-add-to-cart
+            data-id={dessert._id}
+            data-name-es={dessert.nameEs}
+            data-name-en={dessert.nameEn}
+            data-price={displayPrice()}
+            data-image={urlFor(dessert.mainImage).width(400).url()}
+            data-slug={dessert.slug}
+            data-size-es={dessert.sizes && dessert.sizes.length > 0 ? dessert.sizes[0].labelEs : ''}
+            data-size-en={dessert.sizes && dessert.sizes.length > 0 ? dessert.sizes[0].labelEn : ''}
+          >
+            {t.menu.addToCart}
+          </button>
+        </div>
+      </div>
+    </div>
+  </section>
+</BaseLayout>
+
+<script>
+  // Thumbnail gallery
+  document.querySelectorAll<HTMLButtonElement>('.thumb').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const mainImg = document.getElementById('mainImg') as HTMLImageElement;
+      if (mainImg) mainImg.src = btn.dataset.src || '';
+      document.querySelectorAll('.thumb').forEach((b) => b.classList.remove('active'));
+      btn.classList.add('active');
+    });
+  });
+
+  // Size selector
+  const sizeSelector = document.querySelector<HTMLElement>('.size-selector');
+  if (sizeSelector) {
+    const priceEl = document.getElementById('detailPrice');
+    const addBtn = document.querySelector<HTMLButtonElement>('[data-add-to-cart]');
+    sizeSelector.querySelectorAll<HTMLButtonElement>('.size-btn').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        sizeSelector.querySelectorAll('.size-btn').forEach((b) => b.classList.remove('active'));
+        btn.classList.add('active');
+        const price = parseFloat(btn.dataset.price || '0');
+        if (priceEl) priceEl.textContent = '$' + price.toFixed(2);
+        if (addBtn) {
+          addBtn.dataset.price = btn.dataset.price;
+          addBtn.dataset.sizeEs = btn.dataset.labelEs;
+          addBtn.dataset.sizeEn = btn.dataset.labelEn;
+        }
+      });
+    });
+  }
+
+  // Add to cart
+  type CartItem = {
+    dessertId: string; nameEs: string; nameEn: string; price: number;
+    quantity: number; imageUrl: string; slug: string; sizeEs?: string; sizeEn?: string;
+  };
+  const addBtn = document.querySelector<HTMLButtonElement>('[data-add-to-cart]');
+  addBtn?.addEventListener('click', () => {
+    const cart: CartItem[] = JSON.parse(localStorage.getItem('jj_cart') || '[]');
+    const id = addBtn.dataset.id || '';
+    const sizeEs = addBtn.dataset.sizeEs || '';
+    const existing = cart.find((i) => i.dessertId === id && (i.sizeEs || '') === sizeEs);
+    if (existing) { existing.quantity += 1; }
+    else {
+      cart.push({
+        dessertId: id,
+        nameEs: addBtn.dataset.nameEs || '',
+        nameEn: addBtn.dataset.nameEn || '',
+        price: parseFloat(addBtn.dataset.price || '0'),
+        quantity: 1,
+        imageUrl: addBtn.dataset.image || '',
+        slug: addBtn.dataset.slug || '',
+        sizeEs,
+        sizeEn: addBtn.dataset.sizeEn || '',
+      });
+    }
+    localStorage.setItem('jj_cart', JSON.stringify(cart));
+    document.dispatchEvent(new Event('cart:updated'));
+    addBtn.textContent = '✓ Agregado';
+    setTimeout(() => { addBtn.textContent = 'Agregar'; }, 1500);
+  });
+</script>

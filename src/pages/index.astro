@@ -32,21 +32,68 @@ try {
       </div>
       <div class="dessert-grid">
         {featured.map((d) => (
-          <a href={`/menu/${d.slug}`} class="dessert-card">
-            <div class="dessert-card-image">
-              <img src={urlFor(d.mainImage).width(600).url()} alt={d.nameEs} />
-            </div>
+          <article class="dessert-card" data-category={d.category?.nameEs}>
+            <a href={`/menu/${d.slug}`} class="dessert-card-image">
+              <img src={urlFor(d.mainImage).width(600).url()} alt={d.nameEs} loading="lazy" />
+            </a>
             <div class="dessert-card-body">
               <span class="dessert-card-category">{d.category?.nameEs}</span>
-              <h3 class="dessert-card-name">{d.nameEs}</h3>
+              <h3 class="dessert-card-name">
+                <a href={`/menu/${d.slug}`}>{d.nameEs}</a>
+              </h3>
               <div class="dessert-card-footer">
-                <span class="dessert-card-price">{'$'}{d.price.toFixed(2)}</span>
-                <span class="dessert-card-add">{t.menu.addToCart}</span>
+                <span class="dessert-card-price">{'$'}{(d.sizes && d.sizes.length > 0 ? d.sizes[0].price : d.price).toFixed(2)}</span>
+                <button
+                  class="dessert-card-add"
+                  data-add-to-cart
+                  data-id={d._id}
+                  data-name-es={d.nameEs}
+                  data-name-en={d.nameEn}
+                  data-price={d.sizes && d.sizes.length > 0 ? d.sizes[0].price : d.price}
+                  data-image={urlFor(d.mainImage).width(400).url()}
+                  data-slug={d.slug}
+                  data-size-es={d.sizes && d.sizes.length > 0 ? d.sizes[0].labelEs : ''}
+                  data-size-en={d.sizes && d.sizes.length > 0 ? d.sizes[0].labelEn : ''}
+                >{t.menu.addToCart}</button>
               </div>
             </div>
-          </a>
+          </article>
         ))}
       </div>
     </section>
   )}
 </BaseLayout>
+
+<script>
+  type CartItem = {
+    dessertId: string; nameEs: string; nameEn: string; price: number;
+    quantity: number; imageUrl: string; slug: string; sizeEs?: string; sizeEn?: string;
+  };
+  document.querySelectorAll<HTMLButtonElement>('[data-add-to-cart]').forEach((btn) => {
+    btn.addEventListener('click', (e) => {
+      e.preventDefault();
+      const cart: CartItem[] = JSON.parse(localStorage.getItem('jj_cart') || '[]');
+      const id = btn.dataset.id || '';
+      const sizeEs = btn.dataset.sizeEs || '';
+      const existing = cart.find((i) => i.dessertId === id && (i.sizeEs || '') === sizeEs);
+      if (existing) { existing.quantity += 1; }
+      else {
+        cart.push({
+          dessertId: id,
+          nameEs: btn.dataset.nameEs || '',
+          nameEn: btn.dataset.nameEn || '',
+          price: parseFloat(btn.dataset.price || '0'),
+          quantity: 1,
+          imageUrl: btn.dataset.image || '',
+          slug: btn.dataset.slug || '',
+          sizeEs,
+          sizeEn: btn.dataset.sizeEn || '',
+        });
+      }
+      localStorage.setItem('jj_cart', JSON.stringify(cart));
+      document.dispatchEvent(new Event('cart:updated'));
+      btn.textContent = '✓';
+      setTimeout(() => { btn.textContent = btn.textContent === '✓' ? 'Agregar' : btn.textContent; }, 1000);
+    });
+  });
+</script>

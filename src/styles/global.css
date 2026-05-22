@@ -326,6 +326,41 @@ ul { list-style: none; }
 .footer-bottom .puzzle-icon { font-size: 10px; }
 
 /* =========================================================
+   Dessert detail page
+   ========================================================= */
+.detail-section { max-width: var(--max-width); margin: 0 auto; padding: 40px 32px 80px; }
+.detail-back { margin-bottom: 32px; }
+.detail-back a { font-size: 13px; font-weight: 600; letter-spacing: 1px; color: var(--gray); text-transform: uppercase; transition: var(--transition); }
+.detail-back a:hover { color: var(--orange); }
+
+.detail-layout { display: grid; grid-template-columns: 1fr 1fr; gap: 60px; align-items: start; }
+
+/* Images */
+.detail-main-image { border-radius: var(--radius-lg); overflow: hidden; aspect-ratio: 4/3; background: var(--cream); }
+.detail-main-image img { width: 100%; height: 100%; object-fit: cover; transition: opacity 0.3s ease; }
+.detail-thumbs { display: flex; gap: 10px; margin-top: 12px; flex-wrap: wrap; }
+.thumb { border-radius: var(--radius); overflow: hidden; width: 72px; height: 72px; border: 2px solid transparent; transition: var(--transition); padding: 0; }
+.thumb img { width: 100%; height: 100%; object-fit: cover; }
+.thumb.active, .thumb:hover { border-color: var(--orange); }
+
+/* Info */
+.detail-category { color: var(--orange); font-size: 11px; font-weight: 600; letter-spacing: 2px; text-transform: uppercase; }
+.detail-name { font-family: var(--font-serif); font-size: clamp(28px, 4vw, 44px); font-weight: 700; color: var(--black); margin: 10px 0 16px; line-height: 1.15; }
+.detail-desc { color: var(--gray); font-size: 15px; line-height: 1.7; margin-bottom: 24px; }
+.detail-sizes { margin-bottom: 20px; }
+.detail-sizes-label { font-size: 12px; font-weight: 600; letter-spacing: 1px; text-transform: uppercase; color: var(--gray); margin-bottom: 10px; }
+.detail-allergens { margin-bottom: 28px; }
+.detail-footer { display: flex; align-items: center; gap: 20px; margin-top: 28px; flex-wrap: wrap; }
+.detail-price { font-family: var(--font-serif); font-size: 36px; font-weight: 700; color: var(--orange); }
+.detail-add-btn { padding: 14px 32px; background: var(--orange); color: var(--white); border-radius: 30px; font-size: 13px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; transition: var(--transition); }
+.detail-add-btn:hover { background: var(--black); transform: translateY(-2px); }
+
+@media (max-width: 768px) {
+  .detail-layout { grid-template-columns: 1fr; gap: 32px; }
+  .detail-section { padding: 30px 20px 60px; }
+}
+
+/* =========================================================
    Cart / Order page
    ========================================================= */
 .cart-section {
