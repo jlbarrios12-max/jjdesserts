@@ -1,0 +1,291 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { getStrings } from '../i18n/strings';
+
+export const prerender = true;
+
+const locale = 'es';
+const t = getStrings(locale);
+---
+
+<BaseLayout title="Tu Carrito | JJ Desserts" description="Revisa tu pedido y envíalo" locale={locale}>
+  <section class="cart-section">
+
+    <!-- Empty state (shown while loading or when empty) -->
+    <div class="cart-empty" id="cartEmpty" style="display:none;">
+      <div class="cart-empty-icon">🛒</div>
+      <h2>{t.cart.empty}</h2>
+      <p>Agrega algunos postres desde el <a href="/menu">menú</a>.</p>
+    </div>
+
+    <!-- Cart content -->
+    <div class="cart-content" id="cartContent" style="display:none;">
+      <h2 class="cart-title">{t.cart.title}</h2>
+
+      <!-- Items list -->
+      <div class="cart-layout">
+        <div class="cart-items-col">
+          <div id="cartItemsList"></div>
+        </div>
+
+        <!-- Order form + summary -->
+        <aside class="cart-sidebar">
+          <!-- Order summary -->
+          <div class="cart-summary">
+            <h3 class="cart-summary-title">Resumen del Pedido</h3>
+            <div class="cart-summary-row">
+              <span>{t.cart.subtotal}</span>
+              <span id="summarySubtotal">$0.00</span>
+            </div>
+            <div class="cart-summary-row">
+              <span>{t.cart.tax} (7%)</span>
+              <span id="summaryTax">$0.00</span>
+            </div>
+            <div class="cart-summary-row cart-summary-total">
+              <span>{t.cart.total}</span>
+              <span id="summaryTotal">$0.00</span>
+            </div>
+          </div>
+
+          <!-- Customer form -->
+          <form
+            id="orderForm"
+            name="order"
+            method="POST"
+            data-netlify="true"
+            netlify-honeypot="bot-field"
+          >
+            <input type="hidden" name="form-name" value="order" />
+            <input type="hidden" name="pedido" id="fieldPedido" />
+            <input type="hidden" name="total" id="fieldTotal" />
+            <p style="display:none;"><label>No llenar: <input name="bot-field" /></label></p>
+
+            <h3 class="cart-form-title">Tus Datos</h3>
+
+            <div class="cart-form-group">
+              <label for="nombre">Nombre completo *</label>
+              <input type="text" id="nombre" name="nombre" required placeholder="Tu nombre" />
+            </div>
+
+            <div class="cart-form-group">
+              <label for="email">Correo electrónico *</label>
+              <input type="email" id="email" name="email" required placeholder="tu@correo.com" />
+            </div>
+
+            <div class="cart-form-group">
+              <label for="telefono">Teléfono *</label>
+              <input type="tel" id="telefono" name="telefono" required placeholder="(555) 000-0000" />
+            </div>
+
+            <div class="cart-form-group">
+              <label>Tipo de entrega *</label>
+              <div class="cart-radio-group">
+                <label class="cart-radio-label">
+                  <input type="radio" name="tipo-entrega" value="Recogida en sitio" required />
+                  <span>Recogida en sitio</span>
+                </label>
+                <label class="cart-radio-label">
+                  <input type="radio" name="tipo-entrega" value="Entrega a domicilio" />
+                  <span>Entrega a domicilio</span>
+                </label>
+              </div>
+            </div>
+
+            <div class="cart-form-group">
+              <label for="fecha">Fecha preferida</label>
+              <input type="date" id="fecha" name="fecha-preferida" />
+            </div>
+
+            <div class="cart-form-group">
+              <label for="notas">Notas adicionales</label>
+              <textarea id="notas" name="notas" rows="3" placeholder="Alergias, dedicatorias, instrucciones especiales..."></textarea>
+            </div>
+
+            <button type="submit" class="cart-submit-btn" id="submitBtn">
+              Enviar Pedido
+            </button>
+          </form>
+        </aside>
+      </div>
+    </div>
+
+    <!-- Success message -->
+    <div class="cart-success" id="cartSuccess" style="display:none;">
+      <div class="cart-success-icon">✓</div>
+      <h2>¡Pedido Enviado!</h2>
+      <p id="successMsg"></p>
+      <p class="cart-success-sub">JJ Desserts se pondrá en contacto contigo para coordinar la recogida y el pago.</p>
+      <a href="/menu" class="btn btn-primary" style="margin-top:24px; display:inline-block;">Ver más postres</a>
+    </div>
+
+  </section>
+</BaseLayout>
+
+<script>
+  const TAX_RATE = 0.07;
+
+  type CartItem = {
+    dessertId: string;
+    nameEs: string;
+    nameEn: string;
+    price: number;
+    quantity: number;
+    imageUrl: string;
+    slug: string;
+    sizeEs?: string;
+    sizeEn?: string;
+  };
+
+  function getCart(): CartItem[] {
+    try { return JSON.parse(localStorage.getItem('jj_cart') || '[]'); }
+    catch { return []; }
+  }
+
+  function saveCart(cart: CartItem[]) {
+    localStorage.setItem('jj_cart', JSON.stringify(cart));
+    document.dispatchEvent(new Event('cart:updated'));
+  }
+
+  function fmt(n: number) { return '$' + n.toFixed(2); }
+
+  function buildPedidoText(cart: CartItem[]): string {
+    let lines = cart.map(item => {
+      const size = item.sizeEs ? ` (${item.sizeEs})` : '';
+      const lineTotal = item.price * item.quantity;
+      return `${item.quantity}x ${item.nameEs}${size} - ${fmt(item.price)} c/u = ${fmt(lineTotal)}`;
+    });
+    const subtotal = cart.reduce((s, i) => s + i.price * i.quantity, 0);
+    const tax = subtotal * TAX_RATE;
+    const total = subtotal + tax;
+    lines.push('---');
+    lines.push(`Subtotal: ${fmt(subtotal)}`);
+    lines.push(`Impuesto (7%): ${fmt(tax)}`);
+    lines.push(`TOTAL: ${fmt(total)}`);
+    return lines.join('\n');
+  }
+
+  function renderCart() {
+    const cart = getCart();
+    const emptyEl  = document.getElementById('cartEmpty')!;
+    const contentEl = document.getElementById('cartContent')!;
+
+    if (cart.length === 0) {
+      emptyEl.style.display = '';
+      contentEl.style.display = 'none';
+      return;
+    }
+
+    emptyEl.style.display = 'none';
+    contentEl.style.display = '';
+
+    // Render items
+    const listEl = document.getElementById('cartItemsList')!;
+    listEl.innerHTML = cart.map((item, idx) => {
+      const size = item.sizeEs ? `<span class="cart-item-size">${item.sizeEs}</span>` : '';
+      return `
+        <div class="cart-item" data-idx="${idx}">
+          <img src="${item.imageUrl}" alt="${item.nameEs}" class="cart-item-img" />
+          <div class="cart-item-info">
+            <p class="cart-item-name">${item.nameEs}</p>
+            ${size}
+            <p class="cart-item-unit">${fmt(item.price)} c/u</p>
+          </div>
+          <div class="cart-item-controls">
+            <button class="qty-btn" data-action="dec" data-idx="${idx}">−</button>
+            <span class="qty-val">${item.quantity}</span>
+            <button class="qty-btn" data-action="inc" data-idx="${idx}">+</button>
+          </div>
+          <div class="cart-item-total">${fmt(item.price * item.quantity)}</div>
+          <button class="cart-item-remove" data-action="remove" data-idx="${idx}" title="Quitar">✕</button>
+        </div>
+      `;
+    }).join('');
+
+    // Summary
+    const subtotal = cart.reduce((s, i) => s + i.price * i.quantity, 0);
+    const tax = subtotal * TAX_RATE;
+    const total = subtotal + tax;
+    document.getElementById('summarySubtotal')!.textContent = fmt(subtotal);
+    document.getElementById('summaryTax')!.textContent = fmt(tax);
+    document.getElementById('summaryTotal')!.textContent = fmt(total);
+
+    // Hidden form fields
+    (document.getElementById('fieldPedido') as HTMLInputElement).value = buildPedidoText(cart);
+    (document.getElementById('fieldTotal') as HTMLInputElement).value = fmt(total);
+
+    // Qty / remove handlers
+    listEl.querySelectorAll<HTMLButtonElement>('[data-action]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const idx = parseInt(btn.dataset.idx || '0');
+        const cart2 = getCart();
+        const action = btn.dataset.action;
+        if (action === 'inc') {
+          cart2[idx].quantity += 1;
+          saveCart(cart2);
+        } else if (action === 'dec') {
+          cart2[idx].quantity -= 1;
+          if (cart2[idx].quantity <= 0) cart2.splice(idx, 1);
+          saveCart(cart2);
+        } else if (action === 'remove') {
+          cart2.splice(idx, 1);
+          saveCart(cart2);
+        }
+        renderCart();
+      });
+    });
+  }
+
+  // Form submit via AJAX (Netlify Forms)
+  const form = document.getElementById('orderForm') as HTMLFormElement;
+  form?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    // Refresh hidden fields with latest cart
+    const cart = getCart();
+    (document.getElementById('fieldPedido') as HTMLInputElement).value = buildPedidoText(cart);
+    const subtotal = cart.reduce((s, i) => s + i.price * i.quantity, 0);
+    const total = subtotal + subtotal * TAX_RATE;
+    (document.getElementById('fieldTotal') as HTMLInputElement).value = fmt(total);
+
+    const submitBtn = document.getElementById('submitBtn') as HTMLButtonElement;
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Enviando...';
+
+    const data = new FormData(form);
+    const encoded = new URLSearchParams(data as unknown as Record<string, string>).toString();
+
+    try {
+      const res = await fetch('/', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: encoded,
+      });
+
+      if (res.ok) {
+        const nombre = (document.getElementById('nombre') as HTMLInputElement).value;
+        // Clear cart
+        localStorage.removeItem('jj_cart');
+        document.dispatchEvent(new Event('cart:updated'));
+        // Show success
+        document.getElementById('cartContent')!.style.display = 'none';
+        const successEl = document.getElementById('cartSuccess')!;
+        successEl.style.display = '';
+        document.getElementById('successMsg')!.textContent =
+          `Gracias ${nombre}. Tu pedido fue recibido.`;
+        successEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      } else {
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Enviar Pedido';
+        alert('Hubo un error al enviar el pedido. Por favor intenta de nuevo.');
+      }
+    } catch {
+      submitBtn.disabled = false;
+      submitBtn.textContent = 'Enviar Pedido';
+      alert('Hubo un error de conexión. Por favor intenta de nuevo.');
+    }
+  });
+
+  // Initial render + listen for updates
+  renderCart();
+  document.addEventListener('cart:updated', renderCart);
+</script>
