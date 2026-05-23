@@ -79,14 +79,19 @@ const t = getStrings(locale);
               <label>Delivery type *</label>
               <div class="cart-radio-group">
                 <label class="cart-radio-label">
-                  <input type="radio" name="tipo-entrega" value="Pickup" required />
+                  <input type="radio" name="tipo-entrega" value="Pickup" required id="radioPickup" />
                   <span>Pickup</span>
                 </label>
                 <label class="cart-radio-label">
-                  <input type="radio" name="tipo-entrega" value="Delivery" />
+                  <input type="radio" name="tipo-entrega" value="Delivery" id="radioDelivery" />
                   <span>Delivery</span>
                 </label>
               </div>
+            </div>
+
+            <div class="cart-form-group" id="addressGroup" style="display:none;">
+              <label for="direccion">Delivery address *</label>
+              <input type="text" id="direccion" name="direccion" placeholder="Street, number, city..." />
             </div>
 
             <div class="cart-form-group">
@@ -277,4 +282,19 @@ const t = getStrings(locale);
 
   renderCart();
   document.addEventListener('cart:updated', renderCart);
+
+  // Show/hide address field based on delivery type
+  const radioDelivery = document.getElementById('radioDelivery') as HTMLInputElement;
+  const radioPickup = document.getElementById('radioPickup') as HTMLInputElement;
+  const addressGroup = document.getElementById('addressGroup') as HTMLElement;
+  const direccionInput = document.getElementById('direccion') as HTMLInputElement;
+
+  function toggleAddressField() {
+    const isDelivery = radioDelivery?.checked;
+    addressGroup.style.display = isDelivery ? 'block' : 'none';
+    direccionInput.required = isDelivery ?? false;
+  }
+
+  radioDelivery?.addEventListener('change', toggleAddressField);
+  radioPickup?.addEventListener('change', toggleAddressField);
 </script>

@@ -81,14 +81,19 @@ const t = getStrings(locale);
               <label>Tipo de entrega *</label>
               <div class="cart-radio-group">
                 <label class="cart-radio-label">
-                  <input type="radio" name="tipo-entrega" value="Recogida en sitio" required />
+                  <input type="radio" name="tipo-entrega" value="Recogida en sitio" required id="radioPickup" />
                   <span>Recogida en sitio</span>
                 </label>
                 <label class="cart-radio-label">
-                  <input type="radio" name="tipo-entrega" value="Entrega a domicilio" />
+                  <input type="radio" name="tipo-entrega" value="Entrega a domicilio" id="radioDelivery" />
                   <span>Entrega a domicilio</span>
                 </label>
               </div>
+            </div>
+
+            <div class="cart-form-group" id="addressGroup" style="display:none;">
+              <label for="direccion">Dirección de entrega *</label>
+              <input type="text" id="direccion" name="direccion" placeholder="Calle, número, ciudad..." />
             </div>
 
             <div class="cart-form-group">
@@ -288,4 +293,19 @@ const t = getStrings(locale);
   // Initial render + listen for updates
   renderCart();
   document.addEventListener('cart:updated', renderCart);
+
+  // Show/hide address field based on delivery type
+  const radioDelivery = document.getElementById('radioDelivery') as HTMLInputElement;
+  const radioPickup = document.getElementById('radioPickup') as HTMLInputElement;
+  const addressGroup = document.getElementById('addressGroup') as HTMLElement;
+  const direccionInput = document.getElementById('direccion') as HTMLInputElement;
+
+  function toggleAddressField() {
+    const isDelivery = radioDelivery?.checked;
+    addressGroup.style.display = isDelivery ? 'block' : 'none';
+    direccionInput.required = isDelivery ?? false;
+  }
+
+  radioDelivery?.addEventListener('change', toggleAddressField);
+  radioPickup?.addEventListener('change', toggleAddressField);
 </script>
