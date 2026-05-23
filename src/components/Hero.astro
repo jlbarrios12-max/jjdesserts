@@ -25,6 +25,18 @@ const posterUrl = settings?.heroPoster ? urlFor(settings.heroPoster).width(800).
 const menuPath = locale === 'es' ? '/menu' : '/en/menu';
 ---
 
+{(videoUrl || posterUrl) && (
+  <div class="video-banner">
+    {videoUrl ? (
+      <video autoplay muted loop playsinline poster={posterUrl ?? undefined}>
+        <source src={videoUrl} type="video/mp4" />
+      </video>
+    ) : (
+      <img src={posterUrl!} alt="JJ Desserts" />
+    )}
+  </div>
+)}
+
 <section class="hero" id="home">
   <div class="hero-decoration puzzle-1">&#x2756;</div>
   <div class="hero-decoration puzzle-2">&#x2756;</div>
@@ -51,15 +63,3 @@ const menuPath = locale === 'es' ? '/menu' : '/en/menu';
 
   </div>
 </section>
-
-{(videoUrl || posterUrl) && (
-  <div class="video-banner">
-    {videoUrl ? (
-      <video autoplay muted loop playsinline poster={posterUrl ?? undefined}>
-        <source src={videoUrl} type="video/mp4" />
-      </video>
-    ) : (
-      <img src={posterUrl!} alt="JJ Desserts" />
-    )}
-  </div>
-)}
