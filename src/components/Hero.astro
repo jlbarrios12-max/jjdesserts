@@ -49,23 +49,17 @@ const menuPath = locale === 'es' ? '/menu' : '/en/menu';
       </div>
     </div>
 
-    <div class="hero-video-wrapper">
-      {videoUrl ? (
-        <video
-          autoplay
-          muted
-          loop
-          playsinline
-          poster={posterUrl ?? undefined}
-        >
-          <source src={videoUrl} type="video/mp4" />
-          {posterUrl && <img src={posterUrl} alt="JJ Desserts" class="hero-video-fallback" />}
-        </video>
-      ) : posterUrl ? (
-        <img src={posterUrl} alt="JJ Desserts" />
-      ) : (
-        <img src="https://images.unsplash.com/photo-1551024506-0bccd828d307?w=800" alt="JJ Desserts placeholder" />
-      )}
-    </div>
   </div>
 </section>
+
+{(videoUrl || posterUrl) && (
+  <div class="video-banner">
+    {videoUrl ? (
+      <video autoplay muted loop playsinline poster={posterUrl ?? undefined}>
+        <source src={videoUrl} type="video/mp4" />
+      </video>
+    ) : (
+      <img src={posterUrl!} alt="JJ Desserts" />
+    )}
+  </div>
+)}
