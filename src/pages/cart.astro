@@ -260,7 +260,7 @@ const t = getStrings(locale);
     const encoded = new URLSearchParams(data as unknown as Record<string, string>).toString();
 
     try {
-      const res = await fetch('https://n8n-demo.flowverge.ai/webhook/jj-desserts-order', {
+      const res = await fetch('https://n8n.flowverge.ai/webhook/jj-desserts-order', {
         method: 'POST',
         headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
         body: encoded,
@@ -283,29 +283,4 @@ const t = getStrings(locale);
         submitBtn.textContent = 'Enviar Pedido';
         alert('Hubo un error al enviar el pedido. Por favor intenta de nuevo.');
       }
-    } catch {
-      submitBtn.disabled = false;
-      submitBtn.textContent = 'Enviar Pedido';
-      alert('Hubo un error de conexión. Por favor intenta de nuevo.');
-    }
-  });
-
-  // Initial render + listen for updates
-  renderCart();
-  document.addEventListener('cart:updated', renderCart);
-
-  // Show/hide address field based on delivery type
-  const radioDelivery = document.getElementById('radioDelivery') as HTMLInputElement;
-  const radioPickup = document.getElementById('radioPickup') as HTMLInputElement;
-  const addressGroup = document.getElementById('addressGroup') as HTMLElement;
-  const direccionInput = document.getElementById('direccion') as HTMLInputElement;
-
-  function toggleAddressField() {
-    const isDelivery = radioDelivery?.checked;
-    addressGroup.style.display = isDelivery ? 'block' : 'none';
-    direccionInput.required = isDelivery ?? false;
-  }
-
-  radioDelivery?.addEventListener('change', toggleAddressField);
-  radioPickup?.addEventListener('change', toggleAddressField);
-</script>
+    } c
