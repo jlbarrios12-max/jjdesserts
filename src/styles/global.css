@@ -33,7 +33,7 @@ body {
     line-height: 1.6;
     overflow-x: hidden;
     /* Autism puzzle piece watermark */
-    background-image: url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%20100%20100'%3E%3Cpath%20fill='%23D54F1B'%20opacity='0.035'%20d='M30,20L38,20A12,12%200%200,0%2062,20L70,20Q80,20%2080,30L80,38A12,12%200%200,1%2080,62L80,70Q80,80%2070,80L62,80A12,12%200%200,0%2038,80L30,80Q20,80%2020,70L20,62A12,12%200%200,1%2020,38L20,30Q20,20%2030,20Z'/%3E%3C/svg%3E");
+    background-image: url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%20100%20100'%3E%3Cpath%20fill='%23D54F1B'%20opacity='0.035'%20d='M15,15L38,15C38,0%2062,0%2062,15L85,15L85,38C100,38%20100,62%2085,62L85,85L62,85C62,70%2038,70%2038,85L15,85L15,62C30,62%2030,38%2015,38Z'/%3E%3C/svg%3E");
     background-repeat: repeat;
     background-size: 120px 120px;
 }
