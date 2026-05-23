@@ -191,7 +191,7 @@ ul { list-style: none; }
 /* Full-width video banner */
 .video-banner {
     width: 100%;
-    height: 480px;
+    height: 340px;
     overflow: hidden;
     position: relative;
     background: var(--black);
@@ -403,7 +403,7 @@ ul { list-style: none; }
   .hero-container { padding: 0 24px; }
   .hero-title { font-size: clamp(42px, 12vw, 64px); }
   .hero-decoration { display: none; }
-  .video-banner { height: 260px; }
+  .video-banner { height: 200px; }
 }
 
 /* =========================================================
