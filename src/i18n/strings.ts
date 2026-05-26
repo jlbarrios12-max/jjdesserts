@@ -19,7 +19,7 @@ export const strings = {
       filterAll: 'Todos',
       addToCart: 'Agregar',
       outOfStock: 'Agotado',
-      selectSize: 'Elige un tamano',
+      selectSize: 'Elige tu sabor',
       allergensLabel: 'Alergenos',
     },
     allergens: {
@@ -86,7 +86,7 @@ export const strings = {
       filterAll:      'All',
       addToCart:      'Add',
       outOfStock:     'Out of stock',
-      selectSize:     'Choose a size',
+      selectSize:     'Choose your flavor',
       allergensLabel: 'Allergens',
     },
     allergens: {

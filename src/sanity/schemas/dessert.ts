@@ -16,14 +16,14 @@ export const dessert = defineType({
     defineField({ name: 'price', title: 'Precio base (USD)', type: 'number', validation: (Rule) => Rule.positive() }),
     defineField({
       name: 'sizes',
-      title: 'Tamanos / Sizes',
+      title: 'Sabores / Flavors',
       type: 'array',
       of: [{
         type: 'object',
-        title: 'Tamano',
+        title: 'Sabor / Flavor',
         fields: [
-          defineField({ name: 'labelEs', title: 'Nombre del tamano (Espanol)', type: 'string', validation: (Rule) => Rule.required() }),
-          defineField({ name: 'labelEn', title: 'Size name (English)', type: 'string', validation: (Rule) => Rule.required() }),
+          defineField({ name: 'labelEs', title: 'Nombre del sabor (Espanol)', type: 'string', validation: (Rule) => Rule.required() }),
+          defineField({ name: 'labelEn', title: 'Flavor name (English)', type: 'string', validation: (Rule) => Rule.required() }),
           defineField({ name: 'price', title: 'Precio (USD)', type: 'number', validation: (Rule) => Rule.required().positive() }),
         ],
         preview: { select: { title: 'labelEs', subtitle: 'price' } },
