@@ -1,0 +1,162 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { getDessertsByCategorySlug, getCategoryBySlug, getAllCategories } from '../../sanity/queries';
+import { urlFor } from '../../sanity/client';
+import { getStrings } from '../../i18n/strings';
+import type { Dessert, Category, AllergenKey } from '../../sanity/types';
+
+const locale = 'en';
+const t = getStrings(locale);
+
+const { slug } = Astro.params;
+
+const category = slug ? await getCategoryBySlug(slug) : null;
+if (!category) {
+  return new Response(null, { status: 404, statusText: 'Not Found' });
+}
+
+let desserts: Dessert[] = [];
+let categories: Category[] = [];
+try {
+  [desserts, categories] = await Promise.all([
+    getDessertsByCategorySlug(slug!),
+    getAllCategories(),
+  ]);
+} catch (e) {
+  console.warn('Sanity error loading category page.');
+}
+
+function displayPrice(d: Dessert): number {
+  return d.sizes && d.sizes.length > 0 ? d.sizes[0].price : d.price;
+}
+---
+
+<BaseLayout
+  title={`${category.nameEn} | JJ Desserts`}
+  description={`${category.nameEn} - handmade desserts by JJ Desserts`}
+  locale={locale}
+>
+  <section class="menu-section">
+    <div class="menu-header">
+      <h2>{category.nameEn}</h2>
+      <p>{t.menu.subtitle}</p>
+    </div>
+
+    {categories.length > 0 && (
+      <div class="category-filters">
+        {categories.map((c) => (
+          <a
+            href={`/en/${c.slug}`}
+            class={`category-link${c.slug === category.slug ? ' active' : ''}`}
+          >{c.nameEn}</a>
+        ))}
+      </div>
+    )}
+
+    {desserts.length > 0 ? (
+      <div class="dessert-grid" id="dessertGrid">
+        {desserts.map((d) => (
+          <article class="dessert-card">
+            <div class="dessert-card-image">
+              <img src={urlFor(d.mainImage).width(600).url()} alt={d.nameEn} loading="lazy" />
+            </div>
+            <div class="dessert-card-body">
+              <span class="dessert-card-category">{d.category?.nameEn}</span>
+              <h3 class="dessert-card-name">{d.nameEn}</h3>
+              {d.descriptionEn && <p class="dessert-card-desc">{d.descriptionEn}</p>}
+
+              {d.allergens && d.allergens.length > 0 && (
+                <div class="allergens">
+                  <span class="allergens-label">{t.menu.allergensLabel}:</span>
+                  {d.allergens.map((a: AllergenKey) => (
+                    <span class="allergen-tag">{t.allergens[a]}</span>
+                  ))}
+                </div>
+              )}
+
+              {d.sizes && d.sizes.length > 0 && (
+                <div class="size-selector">
+                  {d.sizes.map((s, i) => (
+                    <button
+                      class={`size-btn${i === 0 ? ' active' : ''}`}
+                      data-price={s.price}
+                      data-label-es={s.labelEs}
+                      data-label-en={s.labelEn}
+                    >
+                      <span class="size-label">{s.labelEn}</span>
+                      <span class="size-price">{'$'}{s.price.toFixed(2)}</span>
+                    </button>
+                  ))}
+                </div>
+              )}
+
+              <div class="dessert-card-footer">
+                <span class="dessert-card-price">{'$'}{displayPrice(d).toFixed(2)}</span>
+                <button
+                  class="dessert-card-add"
+                  data-add-to-cart
+                  data-id={d._id}
+                  data-name-es={d.nameEs}
+                  data-name-en={d.nameEn}
+                  data-price={displayPrice(d)}
+                  data-image={urlFor(d.mainImage).width(400).url()}
+                  data-slug={d.slug}
+                  data-size-es={d.sizes && d.sizes.length > 0 ? d.sizes[0].labelEs : ''}
+                  data-size-en={d.sizes && d.sizes.length > 0 ? d.sizes[0].labelEn : ''}
+                >{t.menu.addToCart}</button>
+              </div>
+            </div>
+          </article>
+        ))}
+      </div>
+    ) : (
+      <p style="text-align:center; color: var(--gray); padding: 40px;">
+        No desserts available in this category right now.
+      </p>
+    )}
+  </section>
+</BaseLayout>
+
+<script>
+  // Size selector
+  document.querySelectorAll('.size-btn').forEach((sBtn) => {
+    sBtn.addEventListener('click', () => {
+      const card = sBtn.closest('.dessert-card');
+      if (!card) return;
+      card.querySelectorAll('.size-btn').forEach((b) => b.classList.remove('active'));
+      sBtn.classList.add('active');
+      const addBtn = card.querySelector('[data-add-to-cart]');
+      if (addBtn) {
+        (addBtn as HTMLButtonElement).dataset.price = (sBtn as HTMLElement).dataset.price || '';
+        (addBtn as HTMLButtonElement).dataset.sizeEs = (sBtn as HTMLElement).dataset.labelEs || '';
+        (addBtn as HTMLButtonElement).dataset.sizeEn = (sBtn as HTMLElement).dataset.labelEn || '';
+        const priceEl = card.querySelector('.dessert-card-price');
+        if (priceEl) {
+          const p = parseFloat((sBtn as HTMLElement).dataset.price || '0');
+          priceEl.textContent = '$' + p.toFixed(2);
+        }
+      }
+    });
+  });
+
+  // Add to cart
+  type CartItem = { dessertId: string; nameEs: string; nameEn: string; price: number; quantity: number; imageUrl: string; slug: string; sizeEs?: string; sizeEn?: string; };
+  document.querySelectorAll<HTMLButtonElement>('[data-add-to-cart]').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const cart: CartItem[] = JSON.parse(localStorage.getItem('jj_cart') || '[]');
+      const id = btn.dataset.id || '';
+      const sizeEs = btn.dataset.sizeEs || '';
+      const existing = cart.find((i) => i.dessertId === id && (i.sizeEs || '') === sizeEs);
+      if (existing) { existing.quantity += 1; }
+      else {
+        cart.push({ dessertId: id, nameEs: btn.dataset.nameEs || '', nameEn: btn.dataset.nameEn || '',
+          price: parseFloat(btn.dataset.price || '0'), quantity: 1,
+          imageUrl: btn.dataset.image || '', slug: btn.dataset.slug || '', sizeEs, sizeEn: btn.dataset.sizeEn || '' });
+      }
+      localStorage.setItem('jj_cart', JSON.stringify(cart));
+      document.dispatchEvent(new Event('cart:updated'));
+      btn.textContent = 'OK';
+      setTimeout(() => { btn.textContent = 'Add'; }, 1200);
+    });
+  });
+</script>

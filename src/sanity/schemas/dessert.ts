@@ -11,6 +11,8 @@ export const dessert = defineType({
     defineField({ name: 'category', title: 'Categoria', type: 'reference', to: [{ type: 'category' }], validation: (Rule) => Rule.required() }),
     defineField({ name: 'descriptionEs', title: 'Descripcion (Espanol)', type: 'text', rows: 3 }),
     defineField({ name: 'descriptionEn', title: 'Description (English)', type: 'text', rows: 3 }),
+    defineField({ name: 'shortDescriptionEs', title: 'Descripcion corta - Destacados (Espanol)', type: 'text', rows: 2, description: 'Texto breve que aparece en las tarjetas de Destacados en la home. Maximo ~120 caracteres.', validation: (Rule) => Rule.max(160) }),
+    defineField({ name: 'shortDescriptionEn', title: 'Short description - Featured (English)', type: 'text', rows: 2, description: 'Short text shown on Featured cards on the home page. Max ~120 characters.', validation: (Rule) => Rule.max(160) }),
     defineField({ name: 'price', title: 'Precio base (USD)', type: 'number', validation: (Rule) => Rule.positive() }),
     defineField({
       name: 'sizes',

@@ -28,6 +28,8 @@ export interface Dessert {
   slug: string;
   descriptionEs?: string;
   descriptionEn?: string;
+  shortDescriptionEs?: string;
+  shortDescriptionEn?: string;
   price: number;
   sizes?: DessertSize[];
   allergens?: AllergenKey[];

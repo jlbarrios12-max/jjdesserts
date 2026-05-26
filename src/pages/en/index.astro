@@ -61,34 +61,23 @@ const PUZZLE_PATH = "M15,15L38,15C38,0 62,0 62,15L85,15L85,38C100,38 100,62 85,6
         <p>Our most popular desserts</p>
       </div>
       <div class="dessert-grid">
-        {featured.map((d) => (
-          <article class="dessert-card">
-            <a href={`/en/menu/${d.slug}`} class="dessert-card-image">
-              <img src={urlFor(d.mainImage).width(600).url()} alt={d.nameEn} loading="lazy" />
-            </a>
-            <div class="dessert-card-body">
-              <span class="dessert-card-category">{d.category?.nameEn}</span>
-              <h3 class="dessert-card-name">
-                <a href={`/en/menu/${d.slug}`}>{d.nameEn}</a>
-              </h3>
-              <div class="dessert-card-footer">
-                <span class="dessert-card-price">${(d.sizes && d.sizes.length > 0 ? d.sizes[0].price : d.price).toFixed(2)}</span>
-                <button
-                  class="dessert-card-add"
-                  data-add-to-cart
-                  data-id={d._id}
-                  data-name-es={d.nameEs}
-                  data-name-en={d.nameEn}
-                  data-price={d.sizes && d.sizes.length > 0 ? d.sizes[0].price : d.price}
-                  data-image={urlFor(d.mainImage).width(400).url()}
-                  data-slug={d.slug}
-                  data-size-es={d.sizes && d.sizes.length > 0 ? d.sizes[0].labelEs : ''}
-                  data-size-en={d.sizes && d.sizes.length > 0 ? d.sizes[0].labelEn : ''}
-                >{t.menu.addToCart}</button>
+        {featured.map((d) => {
+          const categoryHref = d.category?.slug ? `/en/${d.category.slug}` : '/en/menu';
+          return (
+            <article class="dessert-card">
+              <a href={categoryHref} class="dessert-card-image">
+                <img src={urlFor(d.mainImage).width(600).url()} alt={d.nameEn} loading="lazy" />
+              </a>
+              <div class="dessert-card-body">
+                <span class="dessert-card-category">{d.category?.nameEn}</span>
+                <h3 class="dessert-card-name">
+                  <a href={categoryHref}>{d.nameEn}</a>
+                </h3>
+                {d.shortDescriptionEn && <p class="dessert-card-desc">{d.shortDescriptionEn}</p>}
               </div>
-            </div>
-          </article>
-        ))}
+            </article>
+          );
+        })}
       </div>
     </section>
   )}

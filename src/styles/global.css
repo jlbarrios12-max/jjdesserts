@@ -232,7 +232,8 @@ ul { list-style: none; }
     display: flex; justify-content: center; flex-wrap: wrap; gap: 10px;
     margin-bottom: 40px;
 }
-.category-filters button {
+.category-filters button,
+.category-filters .category-link {
     padding: 10px 20px;
     border-radius: 30px;
     border: 1.5px solid var(--gray-light);
@@ -241,8 +242,17 @@ ul { list-style: none; }
     letter-spacing: 1px;
     transition: var(--transition);
 }
+.category-filters .category-link {
+    text-decoration: none;
+    color: inherit;
+    display: inline-block;
+    background: transparent;
+    cursor: pointer;
+}
 .category-filters button.active,
-.category-filters button:hover {
+.category-filters button:hover,
+.category-filters .category-link.active,
+.category-filters .category-link:hover {
     background: var(--orange);
     color: var(--white);
     border-color: var(--orange);
