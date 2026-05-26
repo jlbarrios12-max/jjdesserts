@@ -258,6 +258,29 @@ ul { list-style: none; }
     border-color: var(--orange);
 }
 
+.menu-category-section { margin-bottom: 60px; }
+.menu-category-section:last-child { margin-bottom: 0; }
+.menu-category-header {
+    font-family: var(--font-serif);
+    font-size: 28px;
+    font-weight: 700;
+    text-align: center;
+    color: var(--black);
+    margin: 0 0 28px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    position: relative;
+}
+.menu-category-header::after {
+    content: '';
+    display: block;
+    width: 60px;
+    height: 3px;
+    background: var(--orange);
+    margin: 12px auto 0;
+    border-radius: 2px;
+}
+
 .dessert-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));

@@ -4,12 +4,12 @@ import type { Dessert, Category, SiteSettings } from './types';
 export async function getAllDesserts(): Promise<Dessert[]> {
   if (!sanityClient) return [];
   return sanityClient.fetch(`
-    *[_type == "dessert" && available == true] | order(sortOrder asc, nameEs asc) {
+    *[_type == "dessert" && available == true] | order(category->sortOrder asc, sortOrder asc, nameEs asc) {
       _id, nameEs, nameEn, "slug": slug.current,
       descriptionEs, descriptionEn, price,
       sizes[]{ _key, labelEs, labelEn, price },
       allergens, mainImage, gallery, featured,
-      "category": category->{nameEs, nameEn, "slug": slug.current}
+      "category": category->{nameEs, nameEn, "slug": slug.current, sortOrder}
     }
   `);
 }

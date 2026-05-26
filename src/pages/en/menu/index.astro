@@ -41,64 +41,73 @@ function displayPrice(d: Dessert): number {
     )}
 
     {desserts.length > 0 ? (
-      <div class="dessert-grid" id="dessertGrid">
-        {desserts.map((d) => (
-          <article class="dessert-card" data-category={d.category?.slug}>
-            <a href={`/en/menu/${d.slug}`} class="dessert-card-image">
-              <img src={urlFor(d.mainImage).width(600).url()} alt={d.nameEn} loading="lazy" />
-            </a>
-            <div class="dessert-card-body">
-              <span class="dessert-card-category">{d.category?.nameEn}</span>
-              <h3 class="dessert-card-name">
-                <a href={`/en/menu/${d.slug}`}>{d.nameEn}</a>
-              </h3>
-              {d.descriptionEn && <p class="dessert-card-desc">{d.descriptionEn}</p>}
+      <div id="dessertGrid">
+        {categories.map((cat) => {
+          const inCat = desserts.filter((d) => d.category?.slug === cat.slug);
+          if (inCat.length === 0) return null;
+          return (
+            <section class="menu-category-section" data-category={cat.slug}>
+              <h3 class="menu-category-header">{cat.nameEn}</h3>
+              <div class="dessert-grid">
+                {inCat.map((d) => (
+                  <article class="dessert-card" data-category={d.category?.slug}>
+                    <a href={`/en/menu/${d.slug}`} class="dessert-card-image">
+                      <img src={urlFor(d.mainImage).width(600).url()} alt={d.nameEn} loading="lazy" />
+                    </a>
+                    <div class="dessert-card-body">
+                      <span class="dessert-card-category">{d.category?.nameEn}</span>
+                      <h3 class="dessert-card-name">
+                        <a href={`/en/menu/${d.slug}`}>{d.nameEn}</a>
+                      </h3>
+                      {d.descriptionEn && <p class="dessert-card-desc">{d.descriptionEn}</p>}
 
-              {/* Allergens */}
-              {d.allergens && d.allergens.length > 0 && (
-                <div class="allergens">
-                  <span class="allergens-label">{t.menu.allergensLabel}:</span>
-                  {d.allergens.map((a: AllergenKey) => (
-                    <span class="allergen-tag">{t.allergens[a]}</span>
-                  ))}
-                </div>
-              )}
+                      {d.allergens && d.allergens.length > 0 && (
+                        <div class="allergens">
+                          <span class="allergens-label">{t.menu.allergensLabel}:</span>
+                          {d.allergens.map((a: AllergenKey) => (
+                            <span class="allergen-tag">{t.allergens[a]}</span>
+                          ))}
+                        </div>
+                      )}
 
-              {/* Size selector */}
-              {d.sizes && d.sizes.length > 0 && (
-                <div class="size-selector">
-                  {d.sizes.map((s, i) => (
-                    <button
-                      class={`size-btn${i === 0 ? ' active' : ''}`}
-                      data-price={s.price}
-                      data-label-es={s.labelEs}
-                      data-label-en={s.labelEn}
-                    >
-                      <span class="size-label">{s.labelEn}</span>
-                      <span class="size-price">{'$'}{s.price.toFixed(2)}</span>
-                    </button>
-                  ))}
-                </div>
-              )}
+                      {d.sizes && d.sizes.length > 0 && (
+                        <div class="size-selector">
+                          {d.sizes.map((s, i) => (
+                            <button
+                              class={`size-btn${i === 0 ? ' active' : ''}`}
+                              data-price={s.price}
+                              data-label-es={s.labelEs}
+                              data-label-en={s.labelEn}
+                            >
+                              <span class="size-label">{s.labelEn}</span>
+                              <span class="size-price">{'$'}{s.price.toFixed(2)}</span>
+                            </button>
+                          ))}
+                        </div>
+                      )}
 
-              <div class="dessert-card-footer">
-                <span class="dessert-card-price">{'$'}{displayPrice(d).toFixed(2)}</span>
-                <button
-                  class="dessert-card-add"
-                  data-add-to-cart
-                  data-id={d._id}
-                  data-name-es={d.nameEs}
-                  data-name-en={d.nameEn}
-                  data-price={displayPrice(d)}
-                  data-image={urlFor(d.mainImage).width(400).url()}
-                  data-slug={d.slug}
-                  data-size-es={d.sizes && d.sizes.length > 0 ? d.sizes[0].labelEs : ''}
-                  data-size-en={d.sizes && d.sizes.length > 0 ? d.sizes[0].labelEn : ''}
-                >{t.menu.addToCart}</button>
+                      <div class="dessert-card-footer">
+                        <span class="dessert-card-price">{'$'}{displayPrice(d).toFixed(2)}</span>
+                        <button
+                          class="dessert-card-add"
+                          data-add-to-cart
+                          data-id={d._id}
+                          data-name-es={d.nameEs}
+                          data-name-en={d.nameEn}
+                          data-price={displayPrice(d)}
+                          data-image={urlFor(d.mainImage).width(400).url()}
+                          data-slug={d.slug}
+                          data-size-es={d.sizes && d.sizes.length > 0 ? d.sizes[0].labelEs : ''}
+                          data-size-en={d.sizes && d.sizes.length > 0 ? d.sizes[0].labelEn : ''}
+                        >{t.menu.addToCart}</button>
+                      </div>
+                    </div>
+                  </article>
+                ))}
               </div>
-            </div>
-          </article>
-        ))}
+            </section>
+          );
+        })}
       </div>
     ) : (
       <p style="text-align:center; color: var(--gray); padding: 40px;">
@@ -111,16 +120,18 @@ function displayPrice(d: Dessert): number {
 <script>
   // Category filter
   const filters = document.querySelectorAll('#categoryFilters button');
-  const cards = document.querySelectorAll('#dessertGrid .dessert-card');
+  const sections = document.querySelectorAll<HTMLElement>('#dessertGrid .menu-category-section');
   filters.forEach((btn) => {
     btn.addEventListener('click', () => {
       const cat = btn.getAttribute('data-category');
       filters.forEach((b) => b.classList.remove('active'));
       btn.classList.add('active');
-      cards.forEach((c) => {
-        const cardCat = c.getAttribute('data-category');
-        const show = cat === 'all' || cardCat === cat;
-        (c as HTMLElement).style.display = show ? '' : 'none';
+      sections.forEach((s) => {
+        const sCat = s.getAttribute('data-category');
+        const show = cat === 'all' || sCat === cat;
+        s.style.display = show ? '' : 'none';
+        const header = s.querySelector<HTMLElement>('.menu-category-header');
+        if (header) header.style.display = cat === 'all' ? '' : 'none';
       });
     });
   });
