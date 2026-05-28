@@ -56,6 +56,7 @@ const t = getStrings(locale);
             netlify-honeypot="bot-field"
           >
             <input type="hidden" name="form-name" value="order" />
+            <input type="hidden" name="lang" value="es" />
             <input type="hidden" name="pedido" id="fieldPedido" />
             <input type="hidden" name="total" id="fieldTotal" />
             <p style="display:none;"><label>No llenar: <input name="bot-field" /></label></p>
@@ -106,6 +107,9 @@ const t = getStrings(locale);
               <textarea id="notas" name="notas" rows="3" placeholder="Alergias, dedicatorias, instrucciones especiales..."></textarea>
             </div>
 
+            <p id="minOrderWarning" style="display:none; color:#D54F1B; font-size:13px; margin-bottom:12px; text-align:center; font-weight:600;">
+              El pedido mínimo es de $30.00. Agrega más productos para continuar.
+            </p>
             <button type="submit" class="cart-submit-btn" id="submitBtn">
               Enviar Pedido
             </button>
@@ -128,6 +132,7 @@ const t = getStrings(locale);
 
 <script>
   const TAX_RATE = 0.07;
+  const MIN_ORDER = 30;
 
   type CartItem = {
     dessertId: string;
@@ -214,6 +219,17 @@ const t = getStrings(locale);
     document.getElementById('summaryTax')!.textContent = fmt(tax);
     document.getElementById('summaryTotal')!.textContent = fmt(total);
 
+    // Minimum order validation
+    const submitBtn = document.getElementById('submitBtn') as HTMLButtonElement;
+    const warning = document.getElementById('minOrderWarning')!;
+    if (subtotal < MIN_ORDER) {
+      warning.style.display = '';
+      submitBtn.disabled = true;
+    } else {
+      warning.style.display = 'none';
+      submitBtn.disabled = false;
+    }
+
     // Hidden form fields
     (document.getElementById('fieldPedido') as HTMLInputElement).value = buildPedidoText(cart);
     (document.getElementById('fieldTotal') as HTMLInputElement).value = fmt(total);
@@ -247,6 +263,8 @@ const t = getStrings(locale);
 
     // Refresh hidden fields with latest cart
     const cart = getCart();
+    const subtotalCheck = cart.reduce((s, i) => s + i.price * i.quantity, 0);
+    if (subtotalCheck < MIN_ORDER) return;
     (document.getElementById('fieldPedido') as HTMLInputElement).value = buildPedidoText(cart);
     const subtotal = cart.reduce((s, i) => s + i.price * i.quantity, 0);
     const total = subtotal + subtotal * TAX_RATE;
