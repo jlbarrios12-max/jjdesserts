@@ -146,8 +146,8 @@ function displayPrice(d: Dessert): number {
       const addBtn = card.querySelector('[data-add-to-cart]');
       if (addBtn) {
         (addBtn as HTMLButtonElement).dataset.price = (sBtn as HTMLElement).dataset.price || '';
-        (addBtn as HTMLButtonElement).dataset.sizeEs = (sBtn as HTMLElement).dataset.sizeEs || '';
-        (addBtn as HTMLButtonElement).dataset.sizeEn = (sBtn as HTMLElement).dataset.sizeEn || '';
+        (addBtn as HTMLButtonElement).dataset.sizeEs = (sBtn as HTMLElement).dataset.labelEs || '';
+        (addBtn as HTMLButtonElement).dataset.sizeEn = (sBtn as HTMLElement).dataset.labelEn || '';
         const priceEl = card.querySelector('.dessert-card-price');
         if (priceEl) {
           const p = parseFloat((sBtn as HTMLElement).dataset.price || '0');
