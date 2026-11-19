@@ -114,6 +114,14 @@ export const order = defineType({
       type: 'boolean',
       ...RO,
     }),
+    defineField({
+      name: 'refundedAmount',
+      title: 'Reembolsado (USD)',
+      description: 'Lo actualiza Stripe automáticamente al reembolsar desde su panel.',
+      type: 'number',
+      ...RO,
+    }),
+    defineField({ name: 'refundedAt', title: 'Último reembolso', type: 'datetime', ...RO }),
     defineField({ name: 'stripeSessionId', title: 'Stripe Checkout Session ID', type: 'string', ...RO }),
     defineField({ name: 'stripePaymentIntentId', title: 'Stripe Payment Intent ID', type: 'string', ...RO }),
     defineField({ name: 'notifiedAt', title: 'Aviso enviado a n8n', type: 'datetime', ...RO }),
@@ -131,10 +139,12 @@ export const order = defineType({
       status: 'status',
       testMode: 'testMode',
       fecha: 'preferredDate',
+      reembolso: 'refundedAmount',
     },
-    prepare({ title, subtitle, total, status, testMode, fecha }) {
+    prepare({ title, subtitle, total, status, testMode, fecha, reembolso }) {
+      const parcial = status !== 'refunded' && reembolso > 0 ? ` · reembolsado $${reembolso.toFixed(2)}` : '';
       return {
-        title: `${testMode ? '[PRUEBA] ' : ''}#${title || 'sin número'} · ${tituloEstado(status)}`,
+        title: `${testMode ? '[PRUEBA] ' : ''}#${title || 'sin número'} · ${tituloEstado(status)}${parcial}`,
         subtitle: `${subtitle || 'Cliente sin nombre'} — $${total?.toFixed(2) || '0.00'}${fecha ? ` · para ${fecha}` : ''}`,
       };
     },

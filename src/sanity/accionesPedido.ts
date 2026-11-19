@@ -50,7 +50,7 @@ const accionCancelar: DocumentActionComponent = (props) => {
   const { enCurso, aplicar } = usePublicarEstado(props);
   const [confirmando, setConfirmando] = useState(false);
   const pedido = pedidoDe(props);
-  if (!pedido || ['delivered', 'cancelled'].includes(pedido.status ?? '')) return null;
+  if (!pedido || ['delivered', 'cancelled', 'refunded'].includes(pedido.status ?? '')) return null;
 
   const cobrado = pedido.status !== 'pending';
   return {
@@ -62,7 +62,7 @@ const accionCancelar: DocumentActionComponent = (props) => {
       type: 'confirm',
       tone: 'critical',
       message: cobrado
-        ? '¿Cancelar este pedido? OJO: cancelar aquí NO devuelve el dinero. Si el cliente pagó con tarjeta, haz el reembolso en el panel de Stripe.'
+        ? '¿Cancelar este pedido? OJO: cancelar aquí NO devuelve el dinero. Si el cliente pagó con tarjeta, haz el reembolso en el panel de Stripe: al hacerlo, este pedido pasará solo a "Reembolsado".'
         : '¿Cancelar este pedido pendiente de pago?',
       onCancel: () => {
         setConfirmando(false);

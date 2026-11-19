@@ -10,7 +10,7 @@
 
 import type { APIRoute } from 'astro';
 import type Stripe from 'stripe';
-import { cancelarPedidoPendiente, confirmarPago, stripe, webhookSecret } from '../../lib/pedidos';
+import { cancelarPedidoPendiente, confirmarPago, sincronizarReembolso, stripe, webhookSecret } from '../../lib/pedidos';
 
 export const prerender = false;
 
@@ -47,6 +47,18 @@ export const POST: APIRoute = async ({ request }) => {
           const motivo = evento.type === 'checkout.session.expired' ? 'Sesión de pago caducada' : 'Pago rechazado';
           await cancelarPedidoPendiente(orderId, motivo);
         }
+        break;
+      }
+      // Reembolso hecho por Jose en el panel de Stripe (total o parcial), y
+      // cambios posteriores del reembolso (p. ej. si falla).
+      case 'charge.refunded': {
+        await sincronizarReembolso((evento.data.object as Stripe.Charge).id);
+        break;
+      }
+      case 'charge.refund.updated': {
+        const refund = evento.data.object as Stripe.Refund;
+        const chargeId = typeof refund.charge === 'string' ? refund.charge : refund.charge?.id;
+        if (chargeId) await sincronizarReembolso(chargeId);
         break;
       }
       default:

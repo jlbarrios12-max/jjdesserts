@@ -342,6 +342,49 @@ export async function confirmarPago(session: Stripe.Checkout.Session): Promise<b
   return aviso !== 'fallo';
 }
 
+// --- Reembolsos (webhook) -----------------------------------------
+
+/**
+ * Refleja en Sanity lo reembolsado de un cargo. Jose reembolsa desde el
+ * panel de Stripe y el pedido se actualiza solo.
+ *
+ * Idempotente: siempre recalcula desde el cargo (amount_refunded es el
+ * acumulado), así que da igual cuántas veces llegue el evento o en qué
+ * orden. Reembolso total -> estado "refunded"; parcial -> solo el importe.
+ */
+export async function sincronizarReembolso(chargeId: string): Promise<void> {
+  const charge = await stripe().charges.retrieve(chargeId);
+  const piId = typeof charge.payment_intent === 'string' ? charge.payment_intent : charge.payment_intent?.id;
+  if (!piId) {
+    console.error('[pagos] cargo sin payment_intent', chargeId);
+    return;
+  }
+
+  const w = escritor();
+  type PedidoReembolso = { _id: string; status: string; refundedAmount?: number };
+  let pedido = await w.fetch<PedidoReembolso | null>(
+    `*[_type == "order" && stripePaymentIntentId == $piId][0]{ _id, status, refundedAmount }`,
+    { piId }
+  );
+  if (!pedido) {
+    // Por si el aviso de pago aún no guardó el ID: el pedido va en los metadatos.
+    const pi = await stripe().paymentIntents.retrieve(piId);
+    const orderId = pi.metadata?.orderId;
+    pedido = orderId ? ((await w.getDocument<PedidoReembolso>(orderId)) ?? null) : null;
+  }
+  if (!pedido) {
+    console.error('[pagos] reembolso de un pago sin pedido en Sanity', piId);
+    return;
+  }
+
+  const reembolsado = charge.amount_refunded / 100;
+  if (pedido.refundedAmount === reembolsado && (!charge.refunded || pedido.status === 'refunded')) return;
+
+  const cambios: Record<string, unknown> = { refundedAmount: reembolsado, refundedAt: new Date().toISOString() };
+  if (charge.refunded) cambios.status = 'refunded';
+  await w.patch(pedido._id).set(cambios).commit();
+}
+
 const usd = (n: number) => '$' + n.toFixed(2);
 
 /** Mismos campos que el formulario actual del carrito, más el estado del pago. */

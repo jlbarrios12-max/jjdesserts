@@ -55,6 +55,7 @@ export const estructura: StructureResolver = (S) =>
               listaPedidos(S, 'entregados', 'Entregados', ['delivered'], 'desc'),
               listaPedidos(S, 'pendientes-pago', 'Pendientes de pago', ['pending'], 'desc'),
               listaPedidos(S, 'cancelados', 'Cancelados', ['cancelled'], 'desc'),
+              listaPedidos(S, 'reembolsados', 'Reembolsados', ['refunded'], 'desc'),
               S.divider(),
               listaPedidos(S, 'todos', 'Todos los pedidos', null, 'desc'),
             ])
