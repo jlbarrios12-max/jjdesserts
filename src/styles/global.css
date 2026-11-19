@@ -548,9 +548,7 @@ ul { list-style: none; }
 }
 .cart-submit-btn:hover:not(:disabled) { background: var(--black); }
 .cart-submit-btn:disabled { opacity: 0.6; cursor: not-allowed; }
-/* Segundo botón cuando el pago con tarjeta está activo ("Pagar al recoger") */
-.cart-submit-btn-alt { background: var(--white); color: var(--orange); border: 1.5px solid var(--orange); }
-.cart-submit-btn-alt:hover:not(:disabled) { background: var(--orange); color: var(--white); }
+.cart-submit-btn[hidden] { display: none; }
 
 @media (max-width: 768px) {
   .cart-section { padding: 40px 16px 60px; }

@@ -119,8 +119,10 @@ const pagosTarjeta = import.meta.env.PUBLIC_PAGOS_TARJETA === 'true';
                 Pagar con tarjeta
               </button>
             )}
-            <button type="submit" class={pagosTarjeta ? 'cart-submit-btn cart-submit-btn-alt' : 'cart-submit-btn'} id="submitBtn">
-              {pagosTarjeta ? 'Pagar al recoger' : 'Enviar Pedido'}
+            <!-- Flujo anterior (pedido a n8n sin pago). Con el pago con tarjeta
+                 activo se oculta: queda solo como respaldo si se apaga el interruptor. -->
+            <button type="submit" class="cart-submit-btn" id="submitBtn" hidden={pagosTarjeta}>
+              Enviar Pedido
             </button>
           </form>
         </aside>
@@ -273,6 +275,10 @@ const pagosTarjeta = import.meta.env.PUBLIC_PAGOS_TARJETA === 'true';
   const submitLabel = (document.getElementById('submitBtn')?.textContent ?? '').trim() || 'Enviar Pedido';
   form?.addEventListener('submit', async (e) => {
     e.preventDefault();
+    // Con el pago con tarjeta activo, Enter en el formulario lleva al pago,
+    // nunca al flujo anterior sin cobro.
+    const tarjeta = document.getElementById('payCardBtn') as HTMLButtonElement | null;
+    if (tarjeta) { if (!tarjeta.disabled) tarjeta.click(); return; }
 
     // Refresh hidden fields with latest cart
     const cart = getCart();

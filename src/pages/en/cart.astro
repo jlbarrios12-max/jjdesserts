@@ -116,8 +116,9 @@ const pagosTarjeta = import.meta.env.PUBLIC_PAGOS_TARJETA === 'true';
                 Pay by card
               </button>
             )}
-            <button type="submit" class={pagosTarjeta ? 'cart-submit-btn cart-submit-btn-alt' : 'cart-submit-btn'} id="submitBtn">
-              {pagosTarjeta ? 'Pay at pickup' : 'Place Order'}
+            <!-- Flujo anterior (pedido a n8n sin pago): oculto con el pago con tarjeta activo. -->
+            <button type="submit" class="cart-submit-btn" id="submitBtn" hidden={pagosTarjeta}>
+              Place Order
             </button>
           </form>
         </aside>
@@ -265,6 +266,9 @@ const pagosTarjeta = import.meta.env.PUBLIC_PAGOS_TARJETA === 'true';
   const submitLabel = (document.getElementById('submitBtn')?.textContent ?? '').trim() || 'Place Order';
   form?.addEventListener('submit', async (e) => {
     e.preventDefault();
+    // With card payment on, Enter in the form goes to payment, never to the old flow.
+    const tarjeta = document.getElementById('payCardBtn') as HTMLButtonElement | null;
+    if (tarjeta) { if (!tarjeta.disabled) tarjeta.click(); return; }
 
     const cart = getCart();
     const subtotalCheck = cart.reduce((s, i) => s + i.price * i.quantity, 0);
