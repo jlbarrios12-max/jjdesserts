@@ -6,6 +6,9 @@ export const prerender = true;
 
 const locale = 'en';
 const t = getStrings(locale);
+
+// Pago con tarjeta (Stripe): ver src/pages/cart.astro.
+const pagosTarjeta = import.meta.env.PUBLIC_PAGOS_TARJETA === 'true';
 ---
 
 <BaseLayout title="Your Cart | JJ Desserts" description="Review your order and place it" locale={locale}>
@@ -108,8 +111,13 @@ const t = getStrings(locale);
             <p id="minOrderWarning" style="display:none; color:#D54F1B; font-size:13px; margin-bottom:12px; text-align:center; font-weight:600;">
               Minimum order is $30.00. Add more products to continue.
             </p>
-            <button type="submit" class="cart-submit-btn" id="submitBtn">
-              Place Order
+            {pagosTarjeta && (
+              <button type="button" class="cart-submit-btn" id="payCardBtn">
+                Pay by card
+              </button>
+            )}
+            <button type="submit" class={pagosTarjeta ? 'cart-submit-btn cart-submit-btn-alt' : 'cart-submit-btn'} id="submitBtn">
+              {pagosTarjeta ? 'Pay at pickup' : 'Place Order'}
             </button>
           </form>
         </aside>
@@ -218,12 +226,15 @@ const t = getStrings(locale);
     // Minimum order validation
     const submitBtn = document.getElementById('submitBtn') as HTMLButtonElement;
     const warning = document.getElementById('minOrderWarning')!;
+    const payCardBtn = document.getElementById('payCardBtn') as HTMLButtonElement | null;
     if (subtotal < MIN_ORDER) {
       warning.style.display = '';
       submitBtn.disabled = true;
+      if (payCardBtn) payCardBtn.disabled = true;
     } else {
       warning.style.display = 'none';
       submitBtn.disabled = false;
+      if (payCardBtn) payCardBtn.disabled = false;
     }
 
     (document.getElementById('fieldPedido') as HTMLInputElement).value = buildPedidoText(cart);
@@ -251,6 +262,7 @@ const t = getStrings(locale);
   }
 
   const form = document.getElementById('orderForm') as HTMLFormElement;
+  const submitLabel = (document.getElementById('submitBtn')?.textContent ?? '').trim() || 'Place Order';
   form?.addEventListener('submit', async (e) => {
     e.preventDefault();
 
@@ -288,14 +300,59 @@ const t = getStrings(locale);
         successEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
       } else {
         submitBtn.disabled = false;
-        submitBtn.textContent = 'Place Order';
+        submitBtn.textContent = submitLabel;
         alert('There was an error submitting your order. Please try again.');
       }
     } catch {
       submitBtn.disabled = false;
-      submitBtn.textContent = 'Place Order';
+      submitBtn.textContent = submitLabel;
       alert('Connection error. Please try again.');
     }
+  });
+
+  // Card payment: see src/pages/cart.astro. The server recomputes prices and tax.
+  const payCardBtn = document.getElementById('payCardBtn') as HTMLButtonElement | null;
+  payCardBtn?.addEventListener('click', async () => {
+    if (!form.reportValidity()) return;
+    const cart = getCart();
+    if (cart.reduce((s, i) => s + i.price * i.quantity, 0) < MIN_ORDER) return;
+
+    const valor = (id: string) => (document.getElementById(id) as HTMLInputElement | null)?.value ?? '';
+    const entrega = (document.querySelector('input[name="tipo-entrega"]:checked') as HTMLInputElement | null)?.id;
+    const cuerpo = {
+      lang: 'en',
+      botField: (form.querySelector('input[name="bot-field"]') as HTMLInputElement | null)?.value ?? '',
+      items: cart.map((i) => ({ dessertId: i.dessertId, sizeEs: i.sizeEs, quantity: i.quantity })),
+      customer: {
+        nombre: valor('nombre'),
+        email: valor('email'),
+        telefono: valor('telefono'),
+        entrega: entrega === 'radioDelivery' ? 'delivery' : 'pickup',
+        direccion: valor('direccion'),
+        fecha: valor('fecha'),
+        notas: valor('notas'),
+      },
+    };
+
+    payCardBtn.disabled = true;
+    payCardBtn.textContent = 'Redirecting to payment...';
+    try {
+      const res = await fetch('/api/checkout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(cuerpo),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (res.ok && data.url) {
+        window.location.href = data.url;
+        return;
+      }
+      alert(data.message || 'Could not start the payment. Please try again.');
+    } catch {
+      alert('Connection error. Please try again.');
+    }
+    payCardBtn.disabled = false;
+    payCardBtn.textContent = 'Pay by card';
   });
 
   renderCart();

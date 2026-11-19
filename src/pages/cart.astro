@@ -6,6 +6,10 @@ export const prerender = true;
 
 const locale = 'es';
 const t = getStrings(locale);
+
+// Pago con tarjeta (Stripe): solo aparece si se activa en el entorno de
+// compilación. Sin la variable, el carrito queda exactamente como antes.
+const pagosTarjeta = import.meta.env.PUBLIC_PAGOS_TARJETA === 'true';
 ---
 
 <BaseLayout title="Tu Carrito | JJ Desserts" description="Revisa tu pedido y envíalo" locale={locale}>
@@ -110,8 +114,13 @@ const t = getStrings(locale);
             <p id="minOrderWarning" style="display:none; color:#D54F1B; font-size:13px; margin-bottom:12px; text-align:center; font-weight:600;">
               El pedido mínimo es de $30.00. Agrega más productos para continuar.
             </p>
-            <button type="submit" class="cart-submit-btn" id="submitBtn">
-              Enviar Pedido
+            {pagosTarjeta && (
+              <button type="button" class="cart-submit-btn" id="payCardBtn">
+                Pagar con tarjeta
+              </button>
+            )}
+            <button type="submit" class={pagosTarjeta ? 'cart-submit-btn cart-submit-btn-alt' : 'cart-submit-btn'} id="submitBtn">
+              {pagosTarjeta ? 'Pagar al recoger' : 'Enviar Pedido'}
             </button>
           </form>
         </aside>
@@ -222,12 +231,15 @@ const t = getStrings(locale);
     // Minimum order validation
     const submitBtn = document.getElementById('submitBtn') as HTMLButtonElement;
     const warning = document.getElementById('minOrderWarning')!;
+    const payCardBtn = document.getElementById('payCardBtn') as HTMLButtonElement | null;
     if (subtotal < MIN_ORDER) {
       warning.style.display = '';
       submitBtn.disabled = true;
+      if (payCardBtn) payCardBtn.disabled = true;
     } else {
       warning.style.display = 'none';
       submitBtn.disabled = false;
+      if (payCardBtn) payCardBtn.disabled = false;
     }
 
     // Hidden form fields
@@ -258,6 +270,7 @@ const t = getStrings(locale);
 
   // Form submit via AJAX (Netlify Forms)
   const form = document.getElementById('orderForm') as HTMLFormElement;
+  const submitLabel = (document.getElementById('submitBtn')?.textContent ?? '').trim() || 'Enviar Pedido';
   form?.addEventListener('submit', async (e) => {
     e.preventDefault();
 
@@ -298,14 +311,61 @@ const t = getStrings(locale);
         successEl.scrollIntoView({ behavior: 'smooth', block: 'start' });
       } else {
         submitBtn.disabled = false;
-        submitBtn.textContent = 'Enviar Pedido';
+        submitBtn.textContent = submitLabel;
         alert('Hubo un error al enviar el pedido. Por favor intenta de nuevo.');
       }
     } catch {
       submitBtn.disabled = false;
-      submitBtn.textContent = 'Enviar Pedido';
+      submitBtn.textContent = submitLabel;
       alert('Hubo un error de conexión. Por favor intenta de nuevo.');
     }
+  });
+
+  // Pago con tarjeta: el servidor recalcula precios e impuesto y devuelve
+  // la URL de Stripe Checkout. Al navegador solo se le pide qué y cuántos.
+  // El carrito NO se vacía aquí: se vacía en /pedido/gracias si el pago se confirma.
+  const payCardBtn = document.getElementById('payCardBtn') as HTMLButtonElement | null;
+  payCardBtn?.addEventListener('click', async () => {
+    if (!form.reportValidity()) return;
+    const cart = getCart();
+    if (cart.reduce((s, i) => s + i.price * i.quantity, 0) < MIN_ORDER) return;
+
+    const valor = (id: string) => (document.getElementById(id) as HTMLInputElement | null)?.value ?? '';
+    const entrega = (document.querySelector('input[name="tipo-entrega"]:checked') as HTMLInputElement | null)?.id;
+    const cuerpo = {
+      lang: 'es',
+      botField: (form.querySelector('input[name="bot-field"]') as HTMLInputElement | null)?.value ?? '',
+      items: cart.map((i) => ({ dessertId: i.dessertId, sizeEs: i.sizeEs, quantity: i.quantity })),
+      customer: {
+        nombre: valor('nombre'),
+        email: valor('email'),
+        telefono: valor('telefono'),
+        entrega: entrega === 'radioDelivery' ? 'delivery' : 'pickup',
+        direccion: valor('direccion'),
+        fecha: valor('fecha'),
+        notas: valor('notas'),
+      },
+    };
+
+    payCardBtn.disabled = true;
+    payCardBtn.textContent = 'Redirigiendo al pago...';
+    try {
+      const res = await fetch('/api/checkout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(cuerpo),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (res.ok && data.url) {
+        window.location.href = data.url;
+        return;
+      }
+      alert(data.message || 'No se pudo iniciar el pago. Por favor intenta de nuevo.');
+    } catch {
+      alert('Hubo un error de conexión. Por favor intenta de nuevo.');
+    }
+    payCardBtn.disabled = false;
+    payCardBtn.textContent = 'Pagar con tarjeta';
   });
 
   // Initial render + listen for updates

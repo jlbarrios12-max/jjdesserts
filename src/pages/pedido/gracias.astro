@@ -1,0 +1,49 @@
+---
+// Página de vuelta desde Stripe Checkout (español).
+// Solo informa al cliente: la confirmación real del pago llega por el
+// webhook (src/pages/api/stripe-webhook.ts), no por esta página.
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { estadoSesion } from '../../lib/gracias';
+
+export const prerender = false;
+
+const r = await estadoSesion(Astro.url.searchParams.get('session_id'));
+---
+
+<BaseLayout title="Pedido | JJ Desserts" description="Estado de tu pedido" locale="es">
+  <section class="cart-section">
+    {r.estado === 'pagado' && (
+      <div class="cart-success" data-vaciar-carrito>
+        <div class="cart-success-icon">✓</div>
+        <h2>¡Pago recibido!</h2>
+        <p>Gracias{r.nombre ? `, ${r.nombre}` : ''}. Tu pedido <strong>{r.orderNumber}</strong> está pagado.</p>
+        <p class="cart-success-sub">Te llegará un correo de confirmación a {r.email}. JJ Desserts se pondrá en contacto contigo para coordinar la entrega.</p>
+        <a href="/menu" class="btn btn-primary" style="margin-top:24px; display:inline-block;">Ver más postres</a>
+      </div>
+    )}
+    {r.estado === 'procesando' && (
+      <div class="cart-success">
+        <div class="cart-success-icon">…</div>
+        <h2>Estamos confirmando tu pago</h2>
+        <p>Tu pedido <strong>{r.orderNumber}</strong> está registrado. Recibirás un correo en cuanto se confirme el pago.</p>
+        <a href="/menu" class="btn btn-primary" style="margin-top:24px; display:inline-block;">Volver al menú</a>
+      </div>
+    )}
+    {r.estado === 'desconocido' && (
+      <div class="cart-empty">
+        <h2>No encontramos ese pago</h2>
+        <p>Si ya pagaste, revisa tu correo. Si no, puedes volver a tu <a href="/cart">carrito</a>.</p>
+      </div>
+    )}
+  </section>
+</BaseLayout>
+
+<script>
+  // El carrito solo se vacía cuando Stripe confirma el pago.
+  if (document.querySelector('[data-vaciar-carrito]')) {
+    try {
+      localStorage.removeItem('jj_cart');
+      document.dispatchEvent(new Event('cart:updated'));
+    } catch {}
+  }
+</script>

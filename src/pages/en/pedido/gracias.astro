@@ -1,0 +1,46 @@
+---
+// Return page from Stripe Checkout (English). See src/pages/pedido/gracias.astro.
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import { estadoSesion } from '../../../lib/gracias';
+
+export const prerender = false;
+
+const r = await estadoSesion(Astro.url.searchParams.get('session_id'));
+---
+
+<BaseLayout title="Order | JJ Desserts" description="Your order status" locale="en">
+  <section class="cart-section">
+    {r.estado === 'pagado' && (
+      <div class="cart-success" data-vaciar-carrito>
+        <div class="cart-success-icon">✓</div>
+        <h2>Payment received!</h2>
+        <p>Thank you{r.nombre ? `, ${r.nombre}` : ''}. Your order <strong>{r.orderNumber}</strong> is paid.</p>
+        <p class="cart-success-sub">A confirmation email is on its way to {r.email}. JJ Desserts will contact you to arrange delivery.</p>
+        <a href="/en/menu" class="btn btn-primary" style="margin-top:24px; display:inline-block;">See more desserts</a>
+      </div>
+    )}
+    {r.estado === 'procesando' && (
+      <div class="cart-success">
+        <div class="cart-success-icon">…</div>
+        <h2>We're confirming your payment</h2>
+        <p>Your order <strong>{r.orderNumber}</strong> is registered. You'll get an email as soon as the payment is confirmed.</p>
+        <a href="/en/menu" class="btn btn-primary" style="margin-top:24px; display:inline-block;">Back to menu</a>
+      </div>
+    )}
+    {r.estado === 'desconocido' && (
+      <div class="cart-empty">
+        <h2>We couldn't find that payment</h2>
+        <p>If you already paid, check your email. Otherwise you can go back to your <a href="/en/cart">cart</a>.</p>
+      </div>
+    )}
+  </section>
+</BaseLayout>
+
+<script>
+  if (document.querySelector('[data-vaciar-carrito]')) {
+    try {
+      localStorage.removeItem('jj_cart');
+      document.dispatchEvent(new Event('cart:updated'));
+    } catch {}
+  }
+</script>
