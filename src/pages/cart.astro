@@ -45,6 +45,10 @@ const pagosTarjeta = import.meta.env.PUBLIC_PAGOS_TARJETA === 'true';
               <span>{t.cart.tax} (7%)</span>
               <span id="summaryTax">$0.00</span>
             </div>
+            <div class="cart-summary-row" id="summaryEnvioRow" style="display:none;">
+              <span id="summaryEnvioLabel">Envío</span>
+              <span id="summaryEnvio">$0.00</span>
+            </div>
             <div class="cart-summary-row cart-summary-total">
               <span>{t.cart.total}</span>
               <span id="summaryTotal">$0.00</span>
@@ -92,6 +96,20 @@ const pagosTarjeta = import.meta.env.PUBLIC_PAGOS_TARJETA === 'true';
                 <label class="cart-radio-label">
                   <input type="radio" name="tipo-entrega" value="Entrega a domicilio" id="radioDelivery" />
                   <span>Entrega a domicilio</span>
+                </label>
+              </div>
+            </div>
+
+            <div class="cart-form-group" id="zonaGroup" style="display:none;">
+              <label>Distancia desde JJ Desserts *</label>
+              <div class="cart-radio-group">
+                <label class="cart-radio-label">
+                  <input type="radio" name="zona-envio" value="Hasta 15 millas ($15)" data-zona="cerca" id="zonaCerca" />
+                  <span>Hasta 15 millas · $15</span>
+                </label>
+                <label class="cart-radio-label">
+                  <input type="radio" name="zona-envio" value="Más de 15 millas ($25)" data-zona="lejos" id="zonaLejos" />
+                  <span>Más de 15 millas · $25</span>
                 </label>
               </div>
             </div>
@@ -145,6 +163,20 @@ const pagosTarjeta = import.meta.env.PUBLIC_PAGOS_TARJETA === 'true';
   const TAX_RATE = 0.07;
   const MIN_ORDER = 30;
 
+  // Envío a domicilio: lo elige el cliente y va sin impuesto. Debe coincidir
+  // con ENVIO en src/lib/pedidos.ts, que es lo que de verdad se cobra.
+  const ENVIO: Record<string, { usd: number; texto: string }> = {
+    cerca: { usd: 15, texto: 'hasta 15 millas' },
+    lejos: { usd: 25, texto: 'más de 15 millas' },
+  };
+  function zonaElegida(): string {
+    if (!(document.getElementById('radioDelivery') as HTMLInputElement | null)?.checked) return '';
+    return (document.querySelector('input[name="zona-envio"]:checked') as HTMLInputElement | null)?.dataset.zona ?? '';
+  }
+  function envio(): number {
+    return ENVIO[zonaElegida()]?.usd ?? 0;
+  }
+
   type CartItem = {
     dessertId: string;
     nameEs: string;
@@ -177,10 +209,11 @@ const pagosTarjeta = import.meta.env.PUBLIC_PAGOS_TARJETA === 'true';
     });
     const subtotal = cart.reduce((s, i) => s + i.price * i.quantity, 0);
     const tax = subtotal * TAX_RATE;
-    const total = subtotal + tax;
+    const total = subtotal + tax + envio();
     lines.push('---');
     lines.push(`Subtotal: ${fmt(subtotal)}`);
     lines.push(`Impuesto (7%): ${fmt(tax)}`);
+    if (envio() > 0) lines.push(`Envío (${ENVIO[zonaElegida()].texto}): ${fmt(envio())}`);
     lines.push(`TOTAL: ${fmt(total)}`);
     return lines.join('\n');
   }
@@ -225,9 +258,15 @@ const pagosTarjeta = import.meta.env.PUBLIC_PAGOS_TARJETA === 'true';
     // Summary
     const subtotal = cart.reduce((s, i) => s + i.price * i.quantity, 0);
     const tax = subtotal * TAX_RATE;
-    const total = subtotal + tax;
+    const total = subtotal + tax + envio();
     document.getElementById('summarySubtotal')!.textContent = fmt(subtotal);
     document.getElementById('summaryTax')!.textContent = fmt(tax);
+    const envioRow = document.getElementById('summaryEnvioRow')!;
+    envioRow.style.display = envio() > 0 ? '' : 'none';
+    if (envio() > 0) {
+      document.getElementById('summaryEnvioLabel')!.textContent = `Envío (${ENVIO[zonaElegida()].texto})`;
+      document.getElementById('summaryEnvio')!.textContent = fmt(envio());
+    }
     document.getElementById('summaryTotal')!.textContent = fmt(total);
 
     // Minimum order validation
@@ -286,7 +325,7 @@ const pagosTarjeta = import.meta.env.PUBLIC_PAGOS_TARJETA === 'true';
     if (subtotalCheck < MIN_ORDER) return;
     (document.getElementById('fieldPedido') as HTMLInputElement).value = buildPedidoText(cart);
     const subtotal = cart.reduce((s, i) => s + i.price * i.quantity, 0);
-    const total = subtotal + subtotal * TAX_RATE;
+    const total = subtotal + subtotal * TAX_RATE + envio();
     (document.getElementById('fieldTotal') as HTMLInputElement).value = fmt(total);
 
     const submitBtn = document.getElementById('submitBtn') as HTMLButtonElement;
@@ -347,6 +386,7 @@ const pagosTarjeta = import.meta.env.PUBLIC_PAGOS_TARJETA === 'true';
         email: valor('email'),
         telefono: valor('telefono'),
         entrega: entrega === 'radioDelivery' ? 'delivery' : 'pickup',
+        zona: zonaElegida() || undefined,
         direccion: valor('direccion'),
         fecha: valor('fecha'),
         notas: valor('notas'),
@@ -384,12 +424,20 @@ const pagosTarjeta = import.meta.env.PUBLIC_PAGOS_TARJETA === 'true';
   const addressGroup = document.getElementById('addressGroup') as HTMLElement;
   const direccionInput = document.getElementById('direccion') as HTMLInputElement;
 
+  const zonaGroup = document.getElementById('zonaGroup') as HTMLElement;
+  const zonaCerca = document.getElementById('zonaCerca') as HTMLInputElement;
+
   function toggleAddressField() {
     const isDelivery = radioDelivery?.checked;
     addressGroup.style.display = isDelivery ? 'block' : 'none';
     direccionInput.required = isDelivery ?? false;
+    // Distancia: obligatoria solo con entrega a domicilio.
+    zonaGroup.style.display = isDelivery ? 'block' : 'none';
+    zonaCerca.required = isDelivery ?? false;
+    renderCart(); // el envío cambia el total
   }
 
   radioDelivery?.addEventListener('change', toggleAddressField);
   radioPickup?.addEventListener('change', toggleAddressField);
+  document.querySelectorAll('input[name="zona-envio"]').forEach((r) => r.addEventListener('change', renderCart));
 </script>

@@ -65,6 +65,15 @@ export class ErrorPedido extends Error {
 export type Idioma = 'es' | 'en';
 export type Entrega = 'pickup' | 'delivery';
 
+// Envío a domicilio (decisión de Jose, 20/11/2026). La zona la elige el
+// cliente; Jose revisa la dirección al preparar el pedido. Sin distancia
+// máxima. El envío NO lleva impuesto: el 7 % es solo sobre los postres.
+export type Zona = 'cerca' | 'lejos';
+export const ENVIO: Record<Zona, { cents: number; es: string; en: string }> = {
+  cerca: { cents: 1500, es: 'hasta 15 millas', en: 'up to 15 miles' },
+  lejos: { cents: 2500, es: 'más de 15 millas', en: 'over 15 miles' },
+};
+
 export interface LineaEntrada {
   dessertId: string;
   sizeEs?: string;
@@ -76,6 +85,7 @@ export interface ClienteEntrada {
   email: string;
   telefono: string;
   entrega: Entrega;
+  zona?: Zona; // solo con entrega a domicilio
   direccion?: string;
   fecha?: string;
   notas?: string;
@@ -114,6 +124,7 @@ export function validarEntrada(cuerpo: any): { lineas: LineaEntrada[]; cliente: 
     email: texto(c.email, 200),
     telefono: texto(c.telefono, 40),
     entrega,
+    zona: entrega === 'delivery' && (c.zona === 'cerca' || c.zona === 'lejos') ? c.zona : undefined,
     direccion: texto(c.direccion, 300) || undefined,
     fecha: texto(c.fecha, 10) || undefined,
     notas: texto(c.notas, 1000) || undefined,
@@ -122,6 +133,7 @@ export function validarEntrada(cuerpo: any): { lineas: LineaEntrada[]; cliente: 
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(cliente.email)) throw new ErrorPedido('DATOS', 'Correo inválido');
   if (!cliente.entrega) throw new ErrorPedido('DATOS', 'Falta el tipo de entrega');
   if (cliente.entrega === 'delivery' && !cliente.direccion) throw new ErrorPedido('DATOS', 'Falta la dirección de entrega');
+  if (cliente.entrega === 'delivery' && !cliente.zona) throw new ErrorPedido('DATOS', 'Falta elegir la distancia de entrega');
   if (cliente.fecha && !/^\d{4}-\d{2}-\d{2}$/.test(cliente.fecha)) cliente.fecha = undefined;
 
   return { lineas, cliente, idioma };
@@ -145,6 +157,7 @@ export interface Calculo {
   subtotalCents: number;
   taxRate: number;
   taxCents: number;
+  envioCents: number; // 0 en recogida
   totalCents: number;
 }
 
@@ -160,7 +173,7 @@ interface PostreSanity {
 const aCentavos = (usd: number) => Math.round(usd * 100);
 
 /** Recalcula el pedido con precios e impuesto de Sanity. Lanza ErrorPedido. */
-export async function calcularPedido(entrada: LineaEntrada[]): Promise<Calculo> {
+export async function calcularPedido(entrada: LineaEntrada[], zona?: Zona): Promise<Calculo> {
   if (!sanityClient) throw new Error('Sanity no configurado');
   const ids = [...new Set(entrada.map((l) => l.dessertId))];
 
@@ -213,8 +226,10 @@ export async function calcularPedido(entrada: LineaEntrada[]): Promise<Calculo> 
   if (subtotalCents < PEDIDO_MINIMO * 100) {
     throw new ErrorPedido('MINIMO', `El pedido mínimo es de $${PEDIDO_MINIMO.toFixed(2)}`);
   }
+  // El impuesto es solo sobre los postres; el envío va aparte y sin impuesto.
   const taxCents = Math.round(subtotalCents * taxRate);
-  return { lineas, subtotalCents, taxRate, taxCents, totalCents: subtotalCents + taxCents };
+  const envioCents = zona ? ENVIO[zona].cents : 0;
+  return { lineas, subtotalCents, taxRate, taxCents, envioCents, totalCents: subtotalCents + taxCents + envioCents };
 }
 
 // --- Pedido en Sanity ---------------------------------------------
@@ -250,8 +265,10 @@ export async function crearPedidoPendiente(calc: Calculo, cliente: ClienteEntrad
     subtotal: calc.subtotalCents / 100,
     taxRate: calc.taxRate,
     tax: calc.taxCents / 100,
+    deliveryFee: calc.envioCents / 100,
     total: calc.totalCents / 100,
     fulfillmentType: cliente.entrega,
+    deliveryZone: cliente.entrega === 'delivery' ? cliente.zona : undefined,
     deliveryAddress: cliente.entrega === 'delivery' ? cliente.direccion : undefined,
     preferredDate: cliente.fecha,
     notes: cliente.notas,
@@ -288,8 +305,10 @@ interface PedidoGuardado {
   subtotal: number;
   taxRate: number;
   tax: number;
+  deliveryFee?: number;
   total: number;
   fulfillmentType: Entrega;
+  deliveryZone?: Zona;
   deliveryAddress?: string;
   preferredDate?: string;
   notes?: string;
@@ -404,6 +423,10 @@ async function avisarN8n(p: PedidoGuardado): Promise<'enviado' | 'omitido' | 'fa
   lineas.push('---');
   lineas.push(`Subtotal: ${usd(p.subtotal)}`);
   lineas.push(`${en ? 'Tax' : 'Impuesto'} (${pct}): ${usd(p.tax)}`);
+  const zona = p.deliveryZone ? ENVIO[p.deliveryZone] : null;
+  if (p.fulfillmentType === 'delivery' && p.deliveryFee) {
+    lineas.push(`${en ? 'Delivery' : 'Envío'}${zona ? ` (${en ? zona.en : zona.es})` : ''}: ${usd(p.deliveryFee)}`);
+  }
   lineas.push(`TOTAL: ${usd(p.total)}`);
   lineas.push(en ? 'PAID BY CARD (Stripe)' : 'PAGADO CON TARJETA (Stripe)');
 
@@ -416,7 +439,7 @@ async function avisarN8n(p: PedidoGuardado): Promise<'enviado' | 'omitido' | 'fa
     email: p.customerEmail,
     telefono: p.customerPhone,
     'tipo-entrega': p.fulfillmentType === 'delivery'
-      ? (en ? 'Delivery' : 'Entrega a domicilio')
+      ? `${en ? 'Delivery' : 'Entrega a domicilio'}${zona ? ` (${en ? zona.en : zona.es})` : ''}`
       : (en ? 'Pickup' : 'Recogida en sitio'),
     direccion: p.deliveryAddress ?? '',
     'fecha-preferida': p.preferredDate ?? '',

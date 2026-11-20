@@ -68,6 +68,7 @@ export const order = defineType({
     defineField({ name: 'subtotal', title: 'Subtotal (USD)', type: 'number', ...RO }),
     defineField({ name: 'taxRate', title: 'Tasa de impuesto aplicada', type: 'number', ...RO }),
     defineField({ name: 'tax', title: 'Impuesto (USD)', type: 'number', ...RO }),
+    defineField({ name: 'deliveryFee', title: 'Envío (USD)', description: 'Sin impuesto.', type: 'number', ...RO }),
     defineField({ name: 'total', title: 'Total (USD)', type: 'number', ...RO }),
 
     // --- Cliente y entrega ---
@@ -83,6 +84,19 @@ export const order = defineType({
         list: [
           { title: 'Pickup (recogida)', value: 'pickup' },
           { title: 'Delivery (entrega)', value: 'delivery' },
+        ],
+      },
+    }),
+    defineField({
+      name: 'deliveryZone',
+      title: 'Distancia de entrega (la elige el cliente)',
+      description: 'Revisa la dirección: si el cliente eligió mal, ajusta el cobro en Stripe.',
+      type: 'string',
+      ...RO,
+      options: {
+        list: [
+          { title: 'Hasta 15 millas ($15)', value: 'cerca' },
+          { title: 'Más de 15 millas ($25)', value: 'lejos' },
         ],
       },
     }),

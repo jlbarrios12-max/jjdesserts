@@ -162,7 +162,8 @@ Stripe ──► POST /api/stripe-webhook (firmado: la ÚNICA confirmación fiab
 ```
 
 - **El precio nunca viene del navegador.** El carrito solo envía qué postre, qué sabor y cuántos. Probado: con el precio manipulado en el navegador, Stripe cobró el real.
-- El impuesto va como línea propia en Stripe ("Impuesto sobre ventas (7%)").
+- El impuesto va como línea propia en Stripe ("Impuesto sobre ventas (7%)"). Se cobra **siempre**, también en la recogida, y **solo sobre los postres**.
+- **Envío a domicilio** (decisión de Jose, 20/11/2026): **$15 hasta 15 millas** y **$25 a más de 15 millas**, sin distancia máxima y **sin impuesto**. La distancia la **elige el cliente** en el carrito; Jose revisa la dirección al preparar el pedido y, si el cliente se equivocó, ajusta en Stripe. Las tarifas están en `ENVIO` de `src/lib/pedidos.ts` (lo que se cobra) y en los dos carritos (lo que se muestra): si cambian, hay que cambiarlas en los tres sitios. En Stripe sale como línea propia ("Envío a domicilio (hasta 15 millas)") y en Sanity como `deliveryFee` y `deliveryZone`.
 - Si el cliente abandona, la sesión caduca y el pedido pasa a **Cancelado**; Jose no recibe nada.
 - El webhook es **idempotente**: si Stripe repite un aviso, no se duplica ni el pedido ni el correo.
 - Aviso a n8n: mismos campos que el formulario de siempre, más `estado-pago=PAGADO`, `metodo-pago=tarjeta` y `numero-pedido` (`JJ-AAMMDD-XXXX`). Si n8n falla, el webhook responde 500 y Stripe reintenta.
@@ -229,6 +230,7 @@ Netlify despliega automáticamente cada push a `main` (build `npm run build`, ad
 - [ ] Stripe Live de Jose y puesta en producción (§6)
 - [ ] Ajuste de los correos de n8n para pedidos pagados (§6, paso 1)
 - [ ] Que el carrito lea el impuesto de Sanity en vez de tener "7 %" fijo
+- [ ] Opcional: calcular la distancia de entrega automáticamente desde la dirección (hoy la elige el cliente)
 - [ ] Correo al cliente cuando su pedido pase a "Listo" (Sanity → n8n), opcional
 - [ ] Comprimir el vídeo del hero
 - [ ] Migrar fotos de `/assets` a Sanity

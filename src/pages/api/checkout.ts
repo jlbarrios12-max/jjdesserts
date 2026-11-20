@@ -6,6 +6,7 @@
 
 import type { APIRoute } from 'astro';
 import {
+  ENVIO,
   ErrorPedido,
   anotarSesion,
   calcularPedido,
@@ -29,7 +30,7 @@ export const POST: APIRoute = async ({ request }) => {
   let orderId: string | null = null;
   try {
     const { lineas, cliente, idioma } = validarEntrada(await request.json().catch(() => null));
-    const calc = await calcularPedido(lineas);
+    const calc = await calcularPedido(lineas, cliente.zona);
     const pedido = await crearPedidoPendiente(calc, cliente, idioma);
     orderId = pedido._id;
 
@@ -58,6 +59,18 @@ export const POST: APIRoute = async ({ request }) => {
           currency: 'usd',
           unit_amount: calc.taxCents,
           product_data: { name: en ? `Sales tax (${pct})` : `Impuesto sobre ventas (${pct})` },
+        },
+      });
+    }
+    // Envío a domicilio: línea propia y sin impuesto.
+    if (calc.envioCents > 0 && cliente.zona) {
+      const z = ENVIO[cliente.zona];
+      lineItems.push({
+        quantity: 1,
+        price_data: {
+          currency: 'usd',
+          unit_amount: calc.envioCents,
+          product_data: { name: en ? `Home delivery (${z.en})` : `Envío a domicilio (${z.es})` },
         },
       });
     }
