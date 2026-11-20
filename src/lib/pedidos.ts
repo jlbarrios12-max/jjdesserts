@@ -11,18 +11,26 @@
 // =============================================================
 
 import Stripe from 'stripe';
-import { sanityClient, sanityWriteClient } from '../sanity/client';
+import type { SanityClient } from '@sanity/client';
+import { sanityClient } from '../sanity/client';
 
 // --- Configuración -------------------------------------------------
 
-// import.meta.env se resuelve al compilar; process.env cubre el caso de
-// variables que solo existen en tiempo de ejecución en Netlify.
+// Los SECRETOS se leen de process.env en el momento de usarlos, nunca con
+// import.meta.env: Astro copia en el código compilado el valor de todo
+// import.meta.env.X que no sea PUBLIC_, y Netlify cancela el despliegue si
+// encuentra un valor secreto en los archivos desplegados (y además la clave
+// quedaría escrita en un archivo). En local, astro.config.mjs copia el .env
+// a process.env.
+//
+// PUBLIC_PAGOS_TARJETA no es secreto y se resuelve al compilar, igual que en
+// los carritos (que se generan al compilar): así ambos coinciden siempre.
 const env = {
-  pagosTarjeta: import.meta.env.PUBLIC_PAGOS_TARJETA ?? process.env.PUBLIC_PAGOS_TARJETA,
-  stripeSecret: import.meta.env.STRIPE_SECRET_KEY ?? process.env.STRIPE_SECRET_KEY,
-  stripeWebhookSecret: import.meta.env.STRIPE_WEBHOOK_SECRET ?? process.env.STRIPE_WEBHOOK_SECRET,
-  sanityToken: import.meta.env.SANITY_API_TOKEN ?? process.env.SANITY_API_TOKEN,
-  n8nUrl: import.meta.env.N8N_ORDER_WEBHOOK_URL ?? process.env.N8N_ORDER_WEBHOOK_URL,
+  pagosTarjeta: import.meta.env.PUBLIC_PAGOS_TARJETA,
+  get stripeSecret() { return process.env.STRIPE_SECRET_KEY; },
+  get stripeWebhookSecret() { return process.env.STRIPE_WEBHOOK_SECRET; },
+  get sanityToken() { return process.env.SANITY_API_TOKEN; },
+  get n8nUrl() { return process.env.N8N_ORDER_WEBHOOK_URL; },
 };
 
 export const PEDIDO_MINIMO = 30; // USD, sobre el subtotal (igual que el carrito)
@@ -48,9 +56,15 @@ export function webhookSecret(): string {
   return env.stripeWebhookSecret;
 }
 
-function escritor() {
-  if (!sanityWriteClient || !env.sanityToken) throw new Error('SANITY_API_TOKEN no configurado');
-  return sanityWriteClient;
+// Cliente de Sanity con permiso de escritura (token). Vive aquí y no en
+// src/sanity/client.ts para que el token solo exista en código de servidor.
+let escritorCache: SanityClient | null = null;
+function escritor(): SanityClient {
+  if (!sanityClient || !env.sanityToken) throw new Error('SANITY_API_TOKEN no configurado');
+  if (!escritorCache) {
+    escritorCache = sanityClient.withConfig({ useCdn: false, token: env.sanityToken });
+  }
+  return escritorCache;
 }
 
 /** Error con mensaje apto para mostrar al cliente (código HTTP 400). */

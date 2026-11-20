@@ -17,16 +17,9 @@ export const sanityClient: SanityClient | null = isSanityConfigured
     })
   : null;
 
-// Write client (server-side only, uses token)
-export const sanityWriteClient: SanityClient | null = isSanityConfigured
-  ? createClient({
-      projectId: projectId!,
-      dataset,
-      apiVersion: '2024-10-01',
-      useCdn: false,
-      token: import.meta.env.SANITY_API_TOKEN,
-    })
-  : null;
+// El cliente de escritura (con token) vive en src/lib/pedidos.ts, que lee el
+// token de process.env en tiempo de ejecución. No lo pongas aquí con
+// import.meta.env: el token acabaría copiado en el código compilado.
 
 const builder = sanityClient ? imageUrlBuilder(sanityClient) : null;
 
